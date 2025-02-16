@@ -29,10 +29,18 @@ export default function EmployeeTable({
         {employees.map((employee) => (
           <tr key={employee.id} className="border-t">
             <td className="p-2">{employee.name}</td>
-            <td className="p-2">{employee.assignedShifts.length}</td>
-            <td className="p-2">{employee.contractHours}</td>
-            <td className="p-2">{employee.totalWorkedHours}</td>
-            <td className="p-2">{employee.role}</td>
+            <td className="p-2">
+              <span className="ml-1"> {employee.assignedShifts.length}</span>
+            </td>
+            <td className="p-2">
+              <span className="ml-1">{employee.contractHours}</span>
+            </td>
+            <td className="p-2">
+              <span className="ml-1">{employee.totalWorkedHours}</span>
+            </td>
+            <td className="p-2">
+              <span className="ml-1">{employee.role}</span>
+            </td>
             <td className="p-2 flex gap-2">
               <Link
                 href={`/employees/${employee.id}`}
