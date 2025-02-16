@@ -14,10 +14,11 @@ export default function EmployeeTable({
   onRemoveEmployee,
 }: EmployeeTableProps) {
   return (
-    <table className="w-full bg-white rounded-lg shadow-md">
+    <table className="w-full mt-6 bg-white rounded-lg shadow-md">
       <thead className="bg-gray-200">
         <tr>
           <th className="p-2 text-left">Name</th>
+          <th className="p-2 text-left">Total Assigned Shifts</th>
           <th className="p-2 text-left">Contract Hours</th>
           <th className="p-2 text-left">Total Worked Hours</th>
           <th className="p-2 text-left">Role</th>
@@ -28,6 +29,7 @@ export default function EmployeeTable({
         {employees.map((employee) => (
           <tr key={employee.id} className="border-t">
             <td className="p-2">{employee.name}</td>
+            <td className="p-2">{employee.assignedShifts.length}</td>
             <td className="p-2">{employee.contractHours}</td>
             <td className="p-2">{employee.totalWorkedHours}</td>
             <td className="p-2">{employee.role}</td>
