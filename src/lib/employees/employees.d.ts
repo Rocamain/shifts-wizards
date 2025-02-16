@@ -1,4 +1,4 @@
-import { Shift } from "../rota/rota";
+import { Shift, WeekDay } from "../rota/rota";
 
 export interface Employee {
   id: string;
@@ -8,10 +8,9 @@ export interface Employee {
     day: WeekDay;
     timeFrame: { start: string; end: string };
   }>;
-  totalWorkedHours: number; // Tracking total worked hours to enforce contract
+  totalWorkedHours: number;
   assignedShifts: Shift[];
   lastShiftEndTime: string | null;
   role: "TL" | "CTM";
   color?: string;
-  // Shifts assigned to the employee
 }
