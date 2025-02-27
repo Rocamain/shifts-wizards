@@ -4,9 +4,14 @@ import DayTitle from "./DayTitle";
 import DayShifts from "./DayShifts";
 import { Employee } from "@/lib/employees/employees";
 import { useCallback, useState } from "react";
-type WeeklyRotaProps = { employees: Employee[] };
+import React from "react";
 
-export default function WeeklyRota({ employees }: WeeklyRotaProps) {
+interface WeeklyRotaProps {
+  employees: Array<Employee>;
+  title: string;
+}
+
+function WeeklyRota({ employees, title }: WeeklyRotaProps) {
   const [shifts, setShifts] = useState<Week>([[], [], [], [], [], [], []]);
   const [assignmentStatus, setAssignmentStatus] = useState<
     "modified" | "saved"
@@ -25,21 +30,26 @@ export default function WeeklyRota({ employees }: WeeklyRotaProps) {
   );
 
   return (
-    <div className="flex flex-wrap justify-start print:justify-start gap-y-4">
-      {WEEKDAYS.map((weekDay) => (
-        <div
-          key={weekDay.toString()}
-          className="flex-1 border border-gray-600 max-w-fit"
-        >
-          <DayTitle day={weekDay as Weekday} />
-          <DayShifts
-            day={weekDay as Weekday}
-            employees={employees}
-            shifts={shifts[weekDay]}
-            assignShiftToWeekDay={assignShiftToWeekDay}
-          />
-        </div>
-      ))}
+    <div>
+      <h2 className="text-xl font-bold mb-4">{title}</h2>
+      <div className="flex flex-wrap justify-start print:justify-start gap-y-4">
+        {WEEKDAYS.map((weekDay) => (
+          <div
+            key={weekDay.toString()}
+            className="flex-1 border border-gray-600 max-w-fit"
+          >
+            <DayTitle day={weekDay as Weekday} />
+            <DayShifts
+              day={weekDay as Weekday}
+              employees={employees}
+              shifts={shifts[weekDay]}
+              assignShiftToWeekDay={assignShiftToWeekDay}
+            />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
+
+export default WeeklyRota;
