@@ -16,7 +16,7 @@ function WeeklyRota({ employees, title }: WeeklyRotaProps) {
   const [assignmentStatus, setAssignmentStatus] = useState<
     "modified" | "saved"
   >("saved");
-
+  console.log({ assignmentStatus });
   const assignShiftToWeekDay = useCallback(
     (day: Weekday, shiftsForDay: Shift[]) => {
       setShifts((prevShifts) => {
@@ -33,20 +33,23 @@ function WeeklyRota({ employees, title }: WeeklyRotaProps) {
     <div>
       <h2 className="text-xl font-bold mb-4">{title}</h2>
       <div className="flex flex-wrap justify-start print:justify-start gap-y-4">
-        {WEEKDAYS.map((weekDay) => (
-          <div
-            key={weekDay.toString()}
-            className="flex-1 border border-gray-600 max-w-fit"
-          >
-            <DayTitle day={weekDay as Weekday} />
-            <DayShifts
-              day={weekDay as Weekday}
-              employees={employees}
-              shifts={shifts[weekDay]}
-              assignShiftToWeekDay={assignShiftToWeekDay}
-            />
-          </div>
-        ))}
+        {WEEKDAYS.map((weekDay, index) => {
+          console.log(shifts[weekDay]);
+          return (
+            <div
+              key={weekDay.toString() + index}
+              className="flex-1 border border-gray-600 max-w-fit"
+            >
+              <DayTitle day={weekDay as Weekday} />
+              <DayShifts
+                day={weekDay as Weekday}
+                employees={employees}
+                dayShifts={shifts[weekDay]}
+                assignShiftToWeekDay={assignShiftToWeekDay}
+              />
+            </div>
+          );
+        })}
       </div>
     </div>
   );
