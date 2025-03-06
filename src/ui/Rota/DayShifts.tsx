@@ -1,15 +1,104 @@
-import { Shift, Weekday } from "@/lib/rota/rota";
+import { Shift, Weekday, DayShiftsMap } from "@/lib/rota/rota";
 import { Employee } from "@/lib/employees/employees";
+import { useState, useEffect } from "react";
+import { generateHoursArray, getDayhours } from "@/lib/rota/utils";
+import DayShiftsSummary from "./DayShiftSummary";
+import DayShiftForm from "./DayShiftForm";
+import DayShiftsGrid from "./DayShiftsGrid";
+
 type DayShiftsProps = {
   employees: Employee[];
-  shifts: Shift[];
+  dayShifts: DayShiftsMap;
   day: Weekday;
-  assignShiftToWeekDay: (day: Weekday, shiftsForDay: Shift[]) => void;
+  assignShiftToWeekDay: (day: Weekday, shiftsForDay: DayShiftsMap) => void;
 };
 
-export default function DayShifts({ day, employees, shifts }: DayShiftsProps) {
-  const handleAssignShiftToWeekDay = (day: Weekday, shiftsForDay: Shift[]) => {
-    console.log(day, shiftsForDay, { employees, shifts });
+export default function DayShifts({
+  day,
+  dayShifts,
+  assignShiftToWeekDay,
+}: DayShiftsProps) {
+  const [isChecked, setIsChecked] = useState(false);
+  const [openingTimes, setOpeningTimes] = useState<string[]>([]);
+
+  const handleOpeningTimeChange = (time: string, type: "open" | "close") => {
+    setOpeningTimes((prevTimes) => {
+      const newOpen = type === "open" ? time : prevTimes[0];
+      const newClose =
+        type === "close" ? time : prevTimes[prevTimes.length - 1];
+      const newTimes = generateHoursArray({ open: newOpen, close: newClose });
+
+      return newTimes;
+    });
   };
-  return <div className="p-4">{day}</div>;
+
+  useEffect(() => {
+    const effectiveOpen = openingTimes[1];
+    const effectiveClose = openingTimes[openingTimes.length - 1];
+
+    let anyChange = false;
+    const updatedEntries = Array.from(dayShifts.entries()).map(
+      ([key, shift]) => {
+        const updatedShift = { ...shift };
+        if (updatedShift.startTime < effectiveOpen) {
+          updatedShift.startTime = effectiveOpen;
+          anyChange = true;
+        }
+        if (updatedShift.endTime > effectiveClose) {
+          updatedShift.endTime = effectiveClose;
+          anyChange = true;
+        }
+        return [key, updatedShift] as [string, Shift];
+      }
+    );
+
+    if (anyChange) {
+      const updatedDayShifts = new Map(updatedEntries);
+      assignShiftToWeekDay(day, updatedDayShifts);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openingTimes]);
+
+  useEffect(() => {
+    if (openingTimes.length === 0)
+      setOpeningTimes(() =>
+        generateHoursArray({ open: "6:00", close: "22:00" })
+      );
+  }, []);
+
+  const addShift = (day: Weekday, newShift: Shift) => {
+    const newId = newShift.id || `${newShift.startTime}-${newShift.endTime}`;
+
+    const updatedDayShifts = new Map(dayShifts);
+    updatedDayShifts.set(newId, newShift);
+
+    const sortedEntries = Array.from(updatedDayShifts.entries()).sort(
+      ([, a], [, b]) => a.startTime.localeCompare(b.startTime)
+    );
+    const sortedDayShifts = new Map(sortedEntries);
+    assignShiftToWeekDay(day, sortedDayShifts);
+  };
+
+  return (
+    <div className="p-4">
+      <DayShiftsSummary
+        isChecked={isChecked}
+        openingTimes={[openingTimes[1], openingTimes.at(-1)!]}
+        setOpeningTimes={handleOpeningTimeChange}
+        shiftCount={dayShifts.size}
+        totalHours={getDayhours(Array.from(dayShifts.values()))}
+        toggleChecked={setIsChecked}
+      />
+      <DayShiftForm
+        day={day}
+        openingTimes={openingTimes}
+        isChecked={isChecked}
+        addShift={addShift}
+      />
+      <DayShiftsGrid
+        shifts={Array.from(dayShifts.values())}
+        openingTimes={openingTimes}
+      />
+    </div>
+  );
 }

@@ -1,4 +1,5 @@
-// import { Weekday } from "@/lib/rota/rota";
+import { Week } from "./rota";
+
 enum Weekday {
   SUNDAY = 0,
   MONDAY = 1,
@@ -28,3 +29,13 @@ export const WEEKDAY_NAMES: { [key in Weekday]: string } = {
   [Weekday.FRIDAY]: "Friday",
   [Weekday.SATURDAY]: "Saturday",
 };
+
+export const INITIAL_WEEK: Week = new Map([
+  [0, new Map()],
+  [1, new Map()],
+  [2, new Map()],
+  [3, new Map()],
+  [4, new Map()],
+  [5, new Map()],
+  [6, new Map()],
+]);
