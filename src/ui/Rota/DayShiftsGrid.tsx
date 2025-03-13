@@ -1,22 +1,21 @@
-// /src/ui/Rota/DayShiftsGrid.tsx
 import React, { useState } from "react";
 import DayShiftTimeColumn from "./DayShiftTimeColumn";
 import DayShiftShiftColumn from "./DayShiftShiftColumn";
 import DayShiftEditShiftModal from "./DayShiftEditShiftModal";
-import { Shift } from "@/lib/rota/rota";
+import { Shift, Weekday } from "@/lib/rota/rota";
 
 type DayShiftsGridProps = {
   shifts: Shift[];
   openingTimes: string[];
   handleDeleteShift?: (shiftId: string) => void;
-  handleUpdateShift?: (updatedShift: Shift, shiftId: string) => void;
+  updateShift: (day: Weekday, shift: Shift) => void;
 };
 
 export default function DayShiftsGrid({
   shifts,
   openingTimes,
   handleDeleteShift,
-  handleUpdateShift,
+  updateShift,
 }: DayShiftsGridProps) {
   const [open, setOpen] = useState<boolean>(false);
   const [selectedShift, setSelectedShift] = useState<Shift | null>(null);
@@ -32,10 +31,8 @@ export default function DayShiftsGrid({
     setOpen(false);
   };
 
-  const handleModalSave = (updatedShift: Shift) => {
-    if (selectedShiftId && handleUpdateShift) {
-      handleUpdateShift(updatedShift, selectedShiftId);
-    }
+  const handleModalSave = (day: Weekday, updatedShift: Shift) => {
+    updateShift(day, updatedShift);
   };
 
   return (

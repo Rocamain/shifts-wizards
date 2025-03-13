@@ -21,6 +21,7 @@ export default function DayShiftShiftColumn({
   const assignedEmployee = shift.employee
     ? employees.find((emp) => emp.id === shift.employee)
     : null;
+  console.log("render shifts", { shift, assignedEmployee });
 
   return (
     <div
@@ -36,7 +37,7 @@ export default function DayShiftShiftColumn({
               onClick={() => onShiftClick(shift, currentShiftId)}
               key={`shift-${currentShiftId}-${rowIndex}`}
               className={`cursor-pointer w-[33px] h-[33px] flex justify-center ${
-                assignedEmployee ? assignedEmployee.color : "bg-gray-500"
+                assignedEmployee?.color ? assignedEmployee.color : "bg-gray-500"
               } border-b border-r border-gray-300 text-center relative`}
             >
               {handleDeleteShift && (
