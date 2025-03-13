@@ -1,6 +1,6 @@
 export type Shift = {
   id?: string;
-  day: number;
+  day: Weekday;
   startTime: string;
   endTime: string;
   candidates?: string[];

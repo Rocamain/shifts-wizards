@@ -8,8 +8,12 @@ import React, {
   useEffect,
 } from "react";
 import { Employee } from "../employees";
-import { getEmployeeColor, getPermutationBasedOnWeek } from "../utils";
-import { EMPLOYEES } from "../constants";
+import {
+  applyColors,
+  getEmployeeColor,
+  getPermutationBasedOnWeek,
+  loadEmployees,
+} from "../utils";
 
 interface EmployeeContextType {
   employees: Employee[];
@@ -27,20 +31,10 @@ export const EmployeeProvider: React.FC<{ children: React.ReactNode }> = ({
   const [employees, setEmployees] = useState<Employee[]>([]);
 
   useEffect(() => {
-    const JSON_Employees = localStorage.getItem("employees");
-    if (JSON_Employees) {
-      const parsedEmployees = JSON.parse(JSON_Employees);
-      const permutedEmployees = getPermutationBasedOnWeek(parsedEmployees);
-      setEmployees(permutedEmployees);
-    } else {
-      const employeesWithColors = EMPLOYEES.map((employee) => ({
-        ...employee,
-        color: getEmployeeColor(employee.id),
-      }));
-
-      setEmployees(employeesWithColors);
-      localStorage.setItem("employees", JSON.stringify(EMPLOYEES));
-    }
+    const storedEmployees = loadEmployees();
+    const employeesWithColors = applyColors(storedEmployees);
+    const permutedEmployees = getPermutationBasedOnWeek(employeesWithColors);
+    setEmployees(permutedEmployees);
   }, []);
 
   const removeEmployee = useCallback((employeeId: string) => {

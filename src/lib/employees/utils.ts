@@ -1,5 +1,6 @@
 import { COLORS } from "./constants";
 import { Employee } from "./employees";
+import { EMPLOYEES } from "./constants";
 
 export const getEmployeeColor = (id: string): string => {
   const hash = Array.from(id).reduce(
@@ -62,3 +63,19 @@ export function getPermutationBasedOnWeek(arr: Employee[]): Employee[] {
   // Get the nth permutation directly
   return getNthPermutation(arr, index + 1); // 1-based index for permutations
 }
+
+export const applyColors = (employees: Employee[]): Employee[] =>
+  employees.map((employee) => ({
+    ...employee,
+    color: getEmployeeColor(employee.id),
+  }));
+
+export const loadEmployees = (): Employee[] => {
+  const JSON_Employees = localStorage.getItem("employees");
+  if (JSON_Employees) {
+    return JSON.parse(JSON_Employees) as Employee[];
+  } else {
+    localStorage.setItem("employees", JSON.stringify(EMPLOYEES));
+    return EMPLOYEES;
+  }
+};

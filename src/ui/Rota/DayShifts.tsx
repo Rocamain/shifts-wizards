@@ -64,6 +64,7 @@ export default function DayShifts({
       setOpeningTimes(() =>
         generateHoursArray({ open: "6:00", close: "22:00" })
       );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const addShift = (day: Weekday, newShift: Shift) => {
@@ -71,6 +72,21 @@ export default function DayShifts({
 
     const updatedDayShifts = new Map(dayShifts);
     updatedDayShifts.set(newId, newShift);
+
+    const sortedEntries = Array.from(updatedDayShifts.entries()).sort(
+      ([, a], [, b]) => a.startTime.localeCompare(b.startTime)
+    );
+    const sortedDayShifts = new Map(sortedEntries);
+    assignShiftToWeekDay(day, sortedDayShifts);
+  };
+
+  const updateShift = (day: Weekday, shiftToUpdate: Shift) => {
+    const newId =
+      shiftToUpdate.id || `${shiftToUpdate.startTime}-${shiftToUpdate.endTime}`;
+
+    const updatedDayShifts = new Map(dayShifts);
+    updatedDayShifts.delete(shiftToUpdate.id!);
+    updatedDayShifts.set(newId, shiftToUpdate);
 
     const sortedEntries = Array.from(updatedDayShifts.entries()).sort(
       ([, a], [, b]) => a.startTime.localeCompare(b.startTime)
@@ -98,6 +114,7 @@ export default function DayShifts({
       <DayShiftsGrid
         shifts={Array.from(dayShifts.values())}
         openingTimes={openingTimes}
+        updateShift={updateShift}
       />
     </div>
   );
