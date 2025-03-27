@@ -1,9 +1,10 @@
 import { Employee } from "@/lib/employees/employees";
 import { Shift } from "@/lib/rota/rota";
+import { isEmployeeAvailableForShift } from "@/lib/rota/utils";
 import { useState } from "react";
 
 type CandidateDropdownProps = {
-  employees: Employee[]; // Adjust the type based on your employee model
+  employees: Employee[];
   selectedCandidate: string | null;
   shift: Shift;
   onSelectCandidate: (candidate: string | null) => void;

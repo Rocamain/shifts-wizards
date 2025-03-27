@@ -1,11 +1,9 @@
 "use client";
-
-import { Week, DayShiftsMap, Weekday } from "@/lib/rota/rota";
-import { WEEKDAYS, INITIAL_WEEK } from "@/lib/rota/constants";
+import { WEEKDAYS } from "@/lib/rota/constants";
 import DayTitle from "./DayTitle";
 import DayShifts from "./DayShifts";
 import { Employee } from "@/lib/employees/employees";
-import React, { useState, useCallback } from "react";
+import { useRotaContext } from "@/lib/rota/context/RotaContexts";
 
 interface WeeklyRotaProps {
   employees: Employee[];
@@ -13,22 +11,7 @@ interface WeeklyRotaProps {
 }
 
 function WeeklyRota({ employees, title }: WeeklyRotaProps) {
-  const [shifts, setShifts] = useState<Week>(INITIAL_WEEK);
-  const [assignmentStatus, setAssignmentStatus] = useState<
-    "modified" | "saved"
-  >("saved");
-
-  const assignShiftToWeekDay = useCallback(
-    (day: Weekday, dayShifts: DayShiftsMap) => {
-      setShifts((prevShifts) => {
-        const updatedShifts = new Map(prevShifts);
-        updatedShifts.set(day, dayShifts);
-        return updatedShifts;
-      });
-      setAssignmentStatus("modified");
-    },
-    []
-  );
+  const { shifts, updateShiftsToWeekDay } = useRotaContext();
 
   return (
     <div>
@@ -46,7 +29,7 @@ function WeeklyRota({ employees, title }: WeeklyRotaProps) {
                 day={weekDay}
                 employees={employees}
                 dayShifts={dayShifts}
-                assignShiftToWeekDay={assignShiftToWeekDay}
+                updateShiftsToWeekDay={updateShiftsToWeekDay}
               />
             </div>
           );

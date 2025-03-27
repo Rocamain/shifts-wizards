@@ -1,18 +1,20 @@
-import { Shift, Weekday } from "@/lib/rota/rota";
+import { Weekday } from "@/lib/rota/rota";
+import { useRotaContext } from "@/lib/rota/context/RotaContexts";
 
 type DayShiftFormProps = {
   day: Weekday;
   openingTimes: string[];
-  addShift: (day: Weekday, shift: Shift) => void;
   isChecked: boolean;
 };
 
 export default function DayShiftForm({
   day,
   openingTimes,
-  addShift,
+
   isChecked,
 }: DayShiftFormProps) {
+  const { addShift } = useRotaContext();
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const startTime = (

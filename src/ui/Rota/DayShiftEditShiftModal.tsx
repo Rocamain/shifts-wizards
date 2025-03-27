@@ -3,21 +3,21 @@ import Drag from "../Other/Drag";
 import { CandidateDropdown } from "./Modal/CadidateDropDown";
 import { ModalActions } from "./Modal/ModalActions";
 import { TimeInput } from "./Modal/TimeInput";
-import { Shift, Weekday } from "@/lib/rota/rota";
+import { Shift } from "@/lib/rota/rota";
 import { useEmployeeContext } from "@/lib/employees/context/EmployeeContext";
+import { useRotaContext } from "@/lib/rota/context/RotaContexts";
 
 type DayShiftEditShiftModalProps = {
   shift: Shift;
   onClose: () => void;
-  onSave: (day: Weekday, updatedShift: Shift) => void;
 };
 
 export default function DayShiftEditShiftModal({
   shift: initialShift,
   onClose,
-  onSave,
 }: DayShiftEditShiftModalProps) {
   const { employees } = useEmployeeContext();
+  const { updateShift } = useRotaContext();
   const [shift, setShift] = useState<Shift>(initialShift);
   const [selectedCandidate, setSelectedCandidate] = useState<string | null>(
     null
@@ -30,14 +30,15 @@ export default function DayShiftEditShiftModal({
         employee: selectedCandidate,
         candidates: [selectedCandidate],
       };
-      onSave(shift.day, updatedShift);
+      updateShift(shift.day, updatedShift);
     } else {
       const updatedShift = { ...shift };
       delete updatedShift.candidates;
       delete updatedShift.employee;
-      onSave(shift.day, updatedShift);
+
+      updateShift(shift.day, updatedShift);
     }
-  }, [shift, selectedCandidate, onSave]);
+  }, [shift, selectedCandidate, updateShift]);
 
   return (
     <Drag>
