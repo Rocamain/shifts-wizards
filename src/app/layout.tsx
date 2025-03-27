@@ -3,7 +3,7 @@ import localFont from "next/font/local";
 import Navbar from "@/ui/Navbar/Navbar"; // Import the Navbar component
 import "./globals.css";
 import { EmployeeProvider } from "@/lib/employees/context/EmployeeContext";
-
+import { RotaProvider } from "@/lib/rota/context/RotaContexts";
 const geistSans = localFont({
   src: "../fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -28,13 +28,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <EmployeeProvider>
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased print:w-full min-h-screen mx-auto bg-gray-200 print:bg-transparent`}
-        >
-          <Navbar />
+        <RotaProvider>
+          <body
+            className={`${geistSans.variable} ${geistMono.variable} antialiased print:w-full min-h-screen mx-auto bg-gray-200 print:bg-transparent`}
+          >
+            <Navbar />
 
-          <main className="print:w-full w-[1560px] mx-auto">{children}</main>
-        </body>
+            <main className="print:w-full w-[1560px] mx-auto">{children}</main>
+          </body>
+        </RotaProvider>
       </EmployeeProvider>
     </html>
   );
