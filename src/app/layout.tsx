@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import Navbar from "@/ui/Navbar/Navbar"; // Import the Navbar component
+import Navbar from "@/ui/Navbar/Navbar";
 import "./globals.css";
 import { EmployeeProvider } from "@/lib/employees/context/EmployeeContext";
 import { RotaProvider } from "@/lib/rota/context/RotaContexts";
+
 const geistSans = localFont({
   src: "../fonts/GeistVF.woff",
   variable: "--font-geist-sans",
