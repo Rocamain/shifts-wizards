@@ -1,27 +1,24 @@
-import { Weekday, DayShiftsMap } from "@/lib/rota/rota";
-import { Employee } from "@/lib/employees/employees";
+"use client";
+import { Weekday } from "@/lib/rota/rota";
 import { useState } from "react";
-import { getDayhours } from "@/lib/rota/utils";
-import DayShiftsSummary from "./DayShiftSummary";
-import DayShiftForm from "./DayShiftForm";
+import { useRotaContext } from "@/lib/rota/context/RotaContexts";
+import { useOpeningTimesContext } from "@/lib/rota/context/OpeningTimesContext";
+
 import DayShiftsGrid from "./DayShiftsGrid";
-import { useOpeningTimes } from "@/lib/rota/hooks/useOpeningTimes";
+import DayShiftForm from "./DayShiftForm";
+import DayShiftsSummary from "./DayShiftSummary";
+import { getDayhours } from "@/lib/rota/utils";
 
 type DayShiftsProps = {
-  employees: Employee[];
-  dayShifts: DayShiftsMap;
   day: Weekday;
-  updateShiftsToWeekDay: (day: Weekday, shiftsForDay: DayShiftsMap) => void;
 };
 
-export default function DayShifts({
-  day,
-  dayShifts,
-  updateShiftsToWeekDay,
-}: DayShiftsProps) {
+export default function DayShifts({ day }: DayShiftsProps) {
   const [isChecked, setIsChecked] = useState(false);
+  const { shifts, updateShiftsToWeekDay } = useRotaContext();
+  const { openingTimes } = useOpeningTimesContext();
 
-  const { openingTimes, setOpeningTimes } = useOpeningTimes({ day, dayShifts });
+  const dayShifts = shifts.get(day)!;
 
   const handleDeleteShift = (shiftId: string) => {
     const updatedDayShifts = new Map(dayShifts);
@@ -32,21 +29,21 @@ export default function DayShifts({
   return (
     <div className="p-4">
       <DayShiftsSummary
+        day={day}
         isChecked={isChecked}
-        openingTimes={[openingTimes[1], openingTimes.at(-1)!]}
-        setOpeningTimes={setOpeningTimes}
+        openingTimes={[openingTimes[day][1], openingTimes[day].at(-1)!]}
         shiftCount={dayShifts.size}
         totalHours={getDayhours(Array.from(dayShifts.values()))}
         toggleChecked={setIsChecked}
       />
       <DayShiftForm
         day={day}
-        openingTimes={openingTimes}
+        openingTimes={openingTimes[day]}
         isChecked={isChecked}
       />
       <DayShiftsGrid
         shifts={Array.from(dayShifts.values())}
-        openingTimes={openingTimes}
+        openingTimes={openingTimes[day]}
         deleteShift={handleDeleteShift}
       />
     </div>
