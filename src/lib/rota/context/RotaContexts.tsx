@@ -2,11 +2,21 @@
 
 import React, { createContext, useContext, useCallback, useState } from "react";
 import { INITIAL_WEEK } from "../constants";
-import { DayShiftsMap, Shift, Week, Weekday } from "../rota";
+import { DayShiftsMap, EmployeeRole, Shift, Week, Weekday } from "../rota";
+import { usePathname } from "next/navigation";
 
 interface RotaContextType {
   shifts: Week;
   updateShiftsToWeekDay: (day: Weekday, dayShifts: DayShiftsMap) => void;
+  updateShiftsAfterTimeChange: ({
+    day,
+    open,
+    close,
+  }: {
+    day: Weekday;
+    open?: string;
+    close?: string;
+  }) => void;
   addShift: (day: Weekday, newShift: Shift) => void;
   updateShift: (day: Weekday, shiftToUpdate: Shift) => void;
   deleteShift: (day: Weekday, shiftId: string) => void;
@@ -21,6 +31,8 @@ export const RotaProvider: React.FC<{ children: React.ReactNode }> = ({
   const [assignmentStatus, setAssignmentStatus] = useState<
     "modified" | "saved"
   >("saved");
+  const pathname = usePathname();
+  console.log({ assignmentStatus });
 
   const updateShiftsToWeekDay = useCallback(
     (day: Weekday, dayShifts: DayShiftsMap) => {
@@ -34,11 +46,45 @@ export const RotaProvider: React.FC<{ children: React.ReactNode }> = ({
     []
   );
 
+  const updateShiftsAfterTimeChange = useCallback(
+    ({ day, open, close }: { day: Weekday; open?: string; close?: string }) => {
+      const dayShifts = shifts.get(day)!;
+      if (dayShifts.size > 0) {
+        const updatedDayShifts = new Map();
+        dayShifts.forEach((shift, id) => {
+          const updatedShift = {
+            ...shift,
+          };
+          if (open) {
+            updatedShift.startTime =
+              shift.startTime < open ? open : shift.startTime;
+          }
+          if (close) {
+            updatedShift.endTime =
+              shift.endTime > close ? close : shift.endTime;
+          }
+
+          updatedDayShifts.set(id, updatedShift);
+        });
+
+        setShifts((prevShifts) => {
+          const updatedShifts = new Map(prevShifts);
+          updatedShifts.delete(day);
+          updatedShifts.set(day, updatedDayShifts);
+          return updatedShifts;
+        });
+        setAssignmentStatus("modified");
+      }
+    },
+    [shifts]
+  );
+
   const addShift = (day: Weekday, newShift: Shift) => {
-    const newId = newShift.id || `${newShift.startTime}-${newShift.endTime}`;
+    const employeeRole = pathname.split("/")[2].toUpperCase() as EmployeeRole;
+    const newId = newShift.id;
     const dayShifts = shifts.get(day);
     const updatedDayShifts = new Map(dayShifts);
-    updatedDayShifts.set(newId, newShift);
+    updatedDayShifts.set(newId, { ...newShift, employeeRole });
 
     const sortedEntries = Array.from(updatedDayShifts.entries()).sort(
       ([, a], [, b]) => a.startTime.localeCompare(b.startTime)
@@ -74,6 +120,7 @@ export const RotaProvider: React.FC<{ children: React.ReactNode }> = ({
     <RotaContext.Provider
       value={{
         updateShiftsToWeekDay,
+        updateShiftsAfterTimeChange,
         shifts,
         addShift,
         updateShift,

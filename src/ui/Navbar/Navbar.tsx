@@ -14,7 +14,7 @@ export default function Navbar() {
             </Link>
           </li>
           <li>
-            <Link href="/rota/tl" className="hover:underline">
+            <Link href="/rota" className="hover:underline">
               Create Rota
             </Link>
           </li>

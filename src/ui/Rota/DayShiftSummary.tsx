@@ -1,3 +1,6 @@
+import { useOpeningTimesContext } from "@/lib/rota/context/OpeningTimesContext";
+import { useRotaContext } from "@/lib/rota/context/RotaContexts";
+import { Weekday } from "@/lib/rota/rota";
 import { UserIcon } from "@heroicons/react/16/solid";
 import {
   ClockIcon,
@@ -6,26 +9,44 @@ import {
 } from "@heroicons/react/24/outline";
 
 type DayShiftsSummaryProps = {
+  day: Weekday;
   isChecked: boolean;
   openingTimes: [string, string];
-  setOpeningTimes: (time: string, type: "open" | "close") => void;
   shiftCount: number;
   totalHours: number;
   toggleChecked: (checked: boolean) => void;
 };
 
 export default function DayShiftsSummary({
+  day,
   isChecked,
-  openingTimes,
-  setOpeningTimes,
+  // openingTimes,
   shiftCount,
   totalHours,
   toggleChecked,
 }: DayShiftsSummaryProps) {
-  const handleTimeChange = (value: string, type: "open" | "close") => {
-    setOpeningTimes(value, type);
-  };
+  const { setOpeningTimes, openingTimes } = useOpeningTimesContext();
+  const { updateShiftsAfterTimeChange } = useRotaContext();
 
+  const handleTimeChange = (value: string, type: "open" | "close") => {
+    if (type === "open") {
+      setOpeningTimes({ day, times: [value, openingTimes[day].at(-1)!] });
+      updateShiftsAfterTimeChange({
+        day,
+        open: value,
+        close: openingTimes[day].at(-1)!,
+      });
+    }
+
+    if (type === "close") {
+      setOpeningTimes({ day, times: [openingTimes[day][1], value] });
+      updateShiftsAfterTimeChange({
+        day,
+        open: openingTimes[day][1],
+        close: value,
+      });
+    }
+  };
   return (
     <div className="flex items-start justify-between gap-2">
       <div>
@@ -38,12 +59,14 @@ export default function DayShiftsSummary({
             id="time-open"
             name="time-open"
             placeholder="9:00"
-            value={openingTimes[0] || ""}
+            value={openingTimes[day][1] || ""}
             disabled={!isChecked}
             className={`px-1 rounded-sm min-w-[60px] text-center ${
               !isChecked ? "bg-gray-200" : ""
             }`}
-            onChange={(e) => handleTimeChange(e.target.value, "open")}
+            onChange={(e) => {
+              handleTimeChange(e.target.value, "open");
+            }}
           />
         </div>
 
@@ -56,12 +79,14 @@ export default function DayShiftsSummary({
             type="time"
             id="time-close"
             name="time-close"
-            value={openingTimes.at(-1) || ""}
+            value={openingTimes[day].at(-1) || ""}
             disabled={!isChecked}
             className={`px-1 rounded-sm w-[60px] text-center ${
               !isChecked ? "bg-gray-200" : ""
             }`}
-            onChange={(e) => handleTimeChange(e.target.value, "close")}
+            onChange={(e) => {
+              handleTimeChange(e.target.value, "close");
+            }}
           />
         </div>
       </div>
