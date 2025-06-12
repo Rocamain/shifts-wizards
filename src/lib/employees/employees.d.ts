@@ -12,5 +12,17 @@ export interface Employee {
   assignedShifts: Shift[];
   lastShiftEndTime: string | null;
   role: "TL" | "CTM";
+  isBaker: boolean;
   color?: string;
+  accentColor?: string;
 }
+
+export interface UnassignedShiftEmployee {
+  id: "unassigned";
+  name: "Unassigned";
+  color: "bg-gray-500";
+  totalWorkedHours: number;
+  contractHours: number;
+  isBaker: boolean;
+}
+export type EmployeeRole = "TL" | "CTM" | "BAKER";
