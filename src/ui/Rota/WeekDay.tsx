@@ -8,7 +8,7 @@ interface WeekDayProps {
 
 function WeekDay({ day }: WeekDayProps) {
   return (
-    <div className="flex-1 border border-gray-600 min-w-[221px] max-w-fit">
+    <div className="flex-shrink-0 flex-grow flex flex-col border border-gray-600 min-w-[221px] max-w-fit overflow-hidden ">
       <DayTitle day={day} />
       <DayShifts day={day} />
     </div>

@@ -8,17 +8,22 @@ import React, {
   useEffect,
 } from "react";
 import { Employee } from "../employees";
-import {
-  applyColors,
-  getEmployeeColor,
-  getPermutationBasedOnWeek,
-  loadEmployees,
-} from "../utils";
+import { getEmployeeColor, getEmployeesByRole, loadEmployees } from "../utils";
+import { EmployeeRole, Shift } from "@/lib/rota/rota";
+import { calculateShiftHours } from "@/lib/rota/utils";
+import { usePathname } from "next/navigation";
 
 interface EmployeeContextType {
   employees: Employee[];
+  selectedEmployees: Array<string | undefined>;
+  addShiftToEmployee: (employeeId: string, shift: Shift) => void;
+  removeShiftToEmployee: (employeeId: string, shift: Shift) => void;
+  removeSelectedEmployee: (employeeId: string) => void;
+  addSelectedEmployee: (employeeId: string) => void;
   addEmployee: (employee: Employee) => void;
   removeEmployee: (employeeId: string) => void;
+  filterSelectedEmployees: (employeesToFilter: string[]) => void;
+  resetHoursToEmployees: () => void;
 }
 
 const EmployeeContext = createContext<EmployeeContextType | undefined>(
@@ -29,14 +34,28 @@ export const EmployeeProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [selectedEmployees, setSelectedEmployees] = useState<
+    Array<string | undefined>
+  >([]);
+
+  const pathname = usePathname();
 
   useEffect(() => {
     const storedEmployees = loadEmployees();
-    const employeesWithColors = applyColors(storedEmployees);
-    const permutedEmployees = getPermutationBasedOnWeek(employeesWithColors);
-    setEmployees(permutedEmployees);
+
+    setEmployees(storedEmployees);
   }, []);
 
+  useEffect(() => {
+    const roleFromPath = pathname.split("/")[2]?.toUpperCase() as EmployeeRole;
+    if (roleFromPath && employees) {
+      const employyeByRole = getEmployeesByRole(employees, roleFromPath);
+      setSelectedEmployees([
+        "unassigned",
+        ...employyeByRole.map((employee) => employee.id, "unassigned"),
+      ]);
+    }
+  }, [pathname, employees]);
   const removeEmployee = useCallback((employeeId: string) => {
     setEmployees((prev) =>
       prev.filter((employee) => employee.id !== employeeId)
@@ -55,12 +74,89 @@ export const EmployeeProvider: React.FC<{ children: React.ReactNode }> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const filterSelectedEmployees = useCallback(
+    (employeesToFilter: string[]) => {
+      const filteredEmployees = employees
+        .filter((employee) => employeesToFilter.includes(employee.id))
+        .map((employee) => employee.id);
+
+      setSelectedEmployees(filteredEmployees);
+    },
+    [employees]
+  );
+
+  const addSelectedEmployee = useCallback((employeeId: string) => {
+    setSelectedEmployees((prev) => [...prev, employeeId]);
+  }, []);
+  const removeSelectedEmployee = useCallback((employeeId: string) => {
+    setSelectedEmployees((prev) => prev.filter((id) => id !== employeeId));
+  }, []);
+
+  const addShiftToEmployee = useCallback((employeeId: string, shift: Shift) => {
+    setEmployees((prev) => {
+      const employees = prev.map((employee) => {
+        if (employee.id === employeeId) {
+          return {
+            ...employee,
+            totalWorkedHours:
+              employee.totalWorkedHours + calculateShiftHours(shift),
+            assignedShifts: [...employee.assignedShifts, shift],
+          };
+        }
+        return employee;
+      });
+      // localStorage.setItem("employees", JSON.stringify(employees));
+      return employees;
+    });
+  }, []);
+
+  const resetHoursToEmployees = useCallback(() => {
+    setEmployees((prev) => {
+      const employees = prev.map((employee) => {
+        employee.assignedShifts = [];
+        employee.totalWorkedHours = 0;
+        return employee;
+      });
+      // localStorage.setItem("employees", JSON.stringify(employees));
+      return employees;
+    });
+  }, []);
+
+  const removeShiftToEmployee = useCallback(
+    (employeeId: string, shiftToRemove: Shift) => {
+      setEmployees((prev) => {
+        return prev.map((employee) => {
+          if (employee.id === employeeId) {
+            return {
+              ...employee,
+              totalWorkedHours:
+                employee.totalWorkedHours - calculateShiftHours(shiftToRemove),
+              assignedShifts: [
+                ...employee.assignedShifts.filter(
+                  (shift) => shiftToRemove.id !== shift.id
+                ),
+              ],
+            };
+          }
+          return employee;
+        });
+      });
+    },
+    []
+  );
   return (
     <EmployeeContext.Provider
       value={{
         employees,
+        selectedEmployees,
+        addSelectedEmployee,
+        removeSelectedEmployee,
+        addShiftToEmployee,
+        removeShiftToEmployee,
         addEmployee,
         removeEmployee,
+        filterSelectedEmployees,
+        resetHoursToEmployees,
       }}
     >
       {children}

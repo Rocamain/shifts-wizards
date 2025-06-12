@@ -30,7 +30,7 @@ export default function NavLink({ href, children }: NavLinkProps) {
       scroll={false}
       prefetch
       className={clsx(
-        "hover:underline px-4 py-2 rounded text-white",
+        "hover:underline px-4 py-2 rounded text-white shadow-xl",
         isActive ? "bg-blue-500" : "bg-gray-500"
       )}
     >

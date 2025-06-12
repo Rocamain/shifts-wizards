@@ -16,8 +16,14 @@ export default function DayTitle({ day }: DayTitleProps) {
 
   const currentDayPathCTM = `/rota/ctm/${day}`;
   const currentDayPathTL = `/rota/tl/${day}`;
+  const currentDayPathBaker = `/rota/baker/${day}`;
+  const currentDayPathFull = `/rota/baker/${day}`;
+
   const isCurrentDay =
-    pathname === currentDayPathCTM || pathname === currentDayPathTL;
+    pathname === currentDayPathCTM ||
+    pathname === currentDayPathTL ||
+    pathname === currentDayPathBaker ||
+    pathname === currentDayPathFull;
 
   const rootPath = pathname.split("/").slice(0, 3).join("/");
 

@@ -1,4 +1,4 @@
-import { Week } from "./rota";
+import { Shift, Week } from "./rota";
 
 enum Weekday {
   SUNDAY = 0,
@@ -31,11 +31,17 @@ export const WEEKDAY_NAMES: { [key in Weekday]: string } = {
 };
 
 export const INITIAL_WEEK: Week = new Map([
-  [0, new Map()],
-  [1, new Map()],
-  [2, new Map()],
-  [3, new Map()],
-  [4, new Map()],
-  [5, new Map()],
-  [6, new Map()],
+  [0, new Map<string, Shift>()],
+  [1, new Map<string, Shift>()],
+  [2, new Map<string, Shift>()],
+  [3, new Map<string, Shift>()],
+  [4, new Map<string, Shift>()],
+  [5, new Map<string, Shift>()],
+  [6, new Map<string, Shift>()],
 ]);
+
+export const MAX_HOURS_PER_DAY = 13;
+
+export const QUARTER_HOUR = 15 * 60; // 900 s
+
+export const QUARTER_HOUR_MS = 15 * 60 * 1000; // 900000 ms

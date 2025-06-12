@@ -48,7 +48,7 @@ export default function RootLayout({
             >
               <Navbar />
 
-              <main className="print:w-full w-[1560px] mx-auto">
+              <main className="print:w-full w-[1760px] mx-auto overflow-auto">
                 {children}
               </main>
             </body>

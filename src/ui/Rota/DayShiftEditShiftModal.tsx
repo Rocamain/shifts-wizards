@@ -6,6 +6,11 @@ import { TimeInput } from "./Modal/TimeInput";
 import { Shift } from "@/lib/rota/rota";
 import { useEmployeeContext } from "@/lib/employees/context/EmployeeContext";
 import { useRotaContext } from "@/lib/rota/context/RotaContexts";
+import { getEmployeesFromPath } from "@/lib/employees/utils";
+import { usePathname } from "next/navigation";
+import { makeUpdatedShift, shiftHours } from "@/lib/rota/utils";
+import { useOpeningTimesContext } from "@/lib/rota/context/OpeningTimesContext";
+import WeekDay from "./WeekDay";
 
 type DayShiftEditShiftModalProps = {
   shift: Shift;
@@ -16,29 +21,74 @@ export default function DayShiftEditShiftModal({
   shift: initialShift,
   onClose,
 }: DayShiftEditShiftModalProps) {
-  const { employees } = useEmployeeContext();
-  const { updateShift } = useRotaContext();
+  const { employees, addShiftToEmployee, removeShiftToEmployee } =
+    useEmployeeContext();
+  const { openingTimes } = useOpeningTimesContext();
+
+  const { updateShift, week } = useRotaContext();
   const [shift, setShift] = useState<Shift>(initialShift);
   const [selectedCandidate, setSelectedCandidate] = useState<string | null>(
     null
   );
+  const pathname = usePathname();
+  const employesByRole = getEmployeesFromPath(pathname, employees);
 
   const handleSave = useCallback(() => {
-    if (selectedCandidate !== null) {
-      const updatedShift = {
-        ...shift,
-        employee: selectedCandidate,
-        candidates: [selectedCandidate],
-      };
-      updateShift(shift.day, updatedShift);
-    } else {
-      const updatedShift = { ...shift };
-      delete updatedShift.candidates;
-      delete updatedShift.employee;
+    const prevEmployee = shift.employee ?? null;
+    const nextEmployee = selectedCandidate ?? null;
 
-      updateShift(shift.day, updatedShift);
+    const updatedShift = makeUpdatedShift(shift, nextEmployee);
+
+    // Case: both prev and next assigned
+    if (prevEmployee && nextEmployee) {
+      if (prevEmployee !== nextEmployee) {
+        removeShiftToEmployee(prevEmployee, shift);
+        addShiftToEmployee(nextEmployee, updatedShift);
+        updateShift(updatedShift.day, updatedShift);
+        return;
+      }
+
+      if (
+        shift.startTime !== updatedShift.startTime ||
+        shift.endTime !== updatedShift.endTime
+      ) {
+        updateShift(updatedShift.day, updatedShift);
+      }
+      return;
     }
-  }, [shift, selectedCandidate, updateShift]);
+
+    // Case: was unassigned, now assigned
+    if (!prevEmployee && nextEmployee) {
+      addShiftToEmployee(nextEmployee, updatedShift);
+      updateShift(updatedShift.day, updatedShift);
+      return;
+    }
+
+    // Case: was assigned, now unassigned
+    if (prevEmployee && !nextEmployee) {
+      removeShiftToEmployee(prevEmployee, shift);
+      updateShift(updatedShift.day, updatedShift);
+      return;
+    }
+
+    // Case: still unassigned
+    if (
+      shift.startTime !== updatedShift.startTime ||
+      shift.endTime !== updatedShift.endTime
+    ) {
+      updateShift(updatedShift.day, updatedShift);
+    }
+    return;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    shift,
+    selectedCandidate,
+    addShiftToEmployee,
+    removeShiftToEmployee,
+    updateShift,
+    WeekDay,
+    week,
+  ]);
 
   return (
     <Drag>
@@ -46,27 +96,32 @@ export default function DayShiftEditShiftModal({
         <h3 className="text-lg font-bold">Edit Shift</h3>
         <h3>
           Assigned Shift:{" "}
-          {shift.employee
-            ? employees.find((emp) => emp.id === selectedCandidate)?.name
-            : "None"}
+          {selectedCandidate
+            ? employesByRole.find((emp) => emp.id === selectedCandidate)?.name
+            : shift.employee
+            ? employesByRole.find((emp) => emp.id === shift.employee)?.name
+            : "Unassigned"}
         </h3>
+        <h3>Role: {shift.employeeRole}</h3>
+        <h3>Hours: {shiftHours(shift)}</h3>
 
         <TimeInput
           label="Start Time"
           value={shift.startTime}
+          min={openingTimes[shift.day][1]}
           onChange={(value) => setShift({ ...shift, startTime: value })}
         />
-
         <TimeInput
           label="End Time"
+          max={openingTimes[shift.day].at(-2)}
           value={shift.endTime}
           onChange={(value) => setShift({ ...shift, endTime: value })}
         />
 
         <CandidateDropdown
-          employees={employees}
+          employees={employesByRole}
           selectedCandidate={selectedCandidate}
-          shift={shift}
+          newShift={shift}
           onSelectCandidate={setSelectedCandidate}
         />
 

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { usePathname } from "next/navigation";
 import DayShiftTimeColumn from "./DayShiftTimeColumn";
 import DayShiftShiftColumn from "./DayShiftShiftColumn";
 import DayShiftEditShiftModal from "./DayShiftEditShiftModal";
@@ -16,6 +17,20 @@ export default function DayShiftsGrid({
 }: DayShiftsGridProps) {
   const [open, setOpen] = useState<boolean>(false);
   const [selectedShift, setSelectedShift] = useState<Shift | null>(null);
+  const employeeRolePath = usePathname().split("/")[2].toUpperCase();
+
+  const shiftsByRole = shifts.filter(({ employeeRole }) => {
+    if (
+      employeeRolePath === "CTM" ||
+      employeeRolePath === "TL" ||
+      employeeRolePath === "BAKER"
+    ) {
+      return employeeRole === employeeRolePath;
+    }
+    if (employeeRolePath === "FULL") {
+      return true;
+    }
+  });
 
   const handleShiftClick = (shift: Shift) => {
     setOpen(true);
@@ -26,16 +41,15 @@ export default function DayShiftsGrid({
     setOpen(false);
     setSelectedShift(null);
   };
-
   return (
     <div
-      className="grid grid-flow-col gap-0 border border-gray-200"
+      className="grid grid-flow-col gap-0 border border-gray-200 "
       style={{
         gridTemplateColumns: `repeat(${shifts.length + 1}, min-content)`,
       }}
     >
       <DayShiftTimeColumn openingTimes={openingTimes} />
-      {shifts.map((shiftItem) => (
+      {shiftsByRole.map((shiftItem) => (
         <DayShiftShiftColumn
           key={shiftItem.id}
           shift={shiftItem}

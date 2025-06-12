@@ -12,6 +12,7 @@ type NewEmployee = {
   name: string;
   contractHours: number;
   role: "TL" | "CTM";
+  isBaker: boolean;
 };
 
 export default function AddEmployeeModal({
@@ -21,7 +22,8 @@ export default function AddEmployeeModal({
   const [newEmployee, setNewEmployee] = useState<NewEmployee>({
     name: "",
     contractHours: 0,
-    role: "TL", // Default role
+    role: "TL",
+    isBaker: false,
   });
 
   const handleAddEmployee = (newEmployee: NewEmployee) => {
@@ -35,6 +37,7 @@ export default function AddEmployeeModal({
         assignedShifts: [],
         lastShiftEndTime: null,
         role: newEmployee.role,
+        isBaker: newEmployee.isBaker,
       });
       onClose();
     } else {
