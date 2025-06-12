@@ -1,6 +1,9 @@
-import { COLORS } from "./constants";
+import { COLORS, ACCENT_COLORS } from "./constants";
 import { Employee } from "./employees";
 import { EMPLOYEES } from "./constants";
+import { getDayhours, restHoursBetweenShifts } from "../rota/utils";
+import { Shift, Week } from "../rota/rota";
+import { MAX_HOURS_PER_DAY } from "../rota/constants";
 
 export const getEmployeeColor = (id: string): string => {
   const hash = Array.from(id).reduce(
@@ -8,6 +11,13 @@ export const getEmployeeColor = (id: string): string => {
     0
   );
   return COLORS[hash % COLORS.length];
+};
+export const getEmployeeAccentColor = (id: string): string => {
+  const hash = Array.from(id).reduce(
+    (acc, char) => acc + char.charCodeAt(0),
+    0
+  );
+  return ACCENT_COLORS[hash % ACCENT_COLORS.length];
 };
 
 function getCurrentWeekNumber() {
@@ -68,14 +78,130 @@ export const applyColors = (employees: Employee[]): Employee[] =>
   employees.map((employee) => ({
     ...employee,
     color: getEmployeeColor(employee.id),
+    accentColor: getEmployeeAccentColor(employee.id),
   }));
 
 export const loadEmployees = (): Employee[] => {
   const JSON_Employees = localStorage.getItem("employees");
   if (JSON_Employees) {
-    return JSON.parse(JSON_Employees) as Employee[];
+    const storedEmployees = JSON.parse(JSON_Employees) as Employee[];
+    const permutedEmployees = getPermutationBasedOnWeek(storedEmployees);
+
+    return permutedEmployees;
   } else {
-    localStorage.setItem("employees", JSON.stringify(EMPLOYEES));
-    return EMPLOYEES;
+    const employeesWithColors = applyColors(EMPLOYEES);
+    const permutedEmployees = getPermutationBasedOnWeek(employeesWithColors);
+
+    localStorage.setItem("employees", JSON.stringify(permutedEmployees));
+
+    return permutedEmployees;
   }
+};
+
+export function getEmployeesByRole(
+  employees: Employee[],
+  employeeRole: "CTM" | "TL" | "BAKER" | "FULL"
+): Employee[] {
+  return employees.filter(({ role, isBaker }) => {
+    if (employeeRole === "CTM" || employeeRole === "TL") {
+      return role === employeeRole.toUpperCase();
+    }
+    if (employeeRole === "FULL") {
+      return true;
+    }
+
+    if (employeeRole === "BAKER") {
+      return isBaker;
+    }
+
+    return false;
+  });
+}
+
+export const getEmployeesFromPath = (
+  pathname: string,
+  storedEmployees: Employee[]
+) => {
+  const employeeRole = pathname.split("/")[2];
+
+  if (employeeRole === "ctm" || employeeRole === "tl") {
+    return storedEmployees.filter(
+      (employee) => employee.role === employeeRole.toUpperCase()
+    );
+  }
+
+  if (employeeRole === "baker") {
+    return storedEmployees.filter((employee) => employee.isBaker);
+  }
+
+  return storedEmployees;
+};
+
+function hoursWithNewShift(employee: Employee, newShift: Shift): number {
+  const todays = employee.assignedShifts.filter((s) => s.day === newShift.day);
+  return getDayhours([...todays, newShift]);
+}
+
+function hasCapacity(employee: Employee, newShift: Shift) {
+  return hoursWithNewShift(employee, newShift) <= MAX_HOURS_PER_DAY;
+}
+
+export const getEmployesWithoutTimeRestriction = (
+  employees: Employee[],
+  newShift: Shift
+) => employees.filter((employee) => hasCapacity(employee, newShift));
+
+export const getAvailableEmployees = (
+  employees: Employee[],
+  newShift: Shift,
+  rota: Week
+): Employee[] => {
+  const day = newShift.day;
+  const prevDay = day - 1;
+  const nextDay = day + 1;
+
+  return employees.filter((employee) => {
+    // 1) Capacity check
+    if (!hasCapacity(employee, newShift)) {
+      return false;
+    }
+
+    // 2) Rest after previous-day shift
+    if (rota.has(prevDay)) {
+      const prevShiftsMap = rota.get(prevDay)!;
+      // find any shift on prevDay assigned to this employee
+      const prevShifts = Array.from(prevShiftsMap.values()).filter(
+        (s) => s.employee === employee.id
+      );
+      for (const prevShift of prevShifts) {
+        const restHours = restHoursBetweenShifts({
+          prevShift,
+          shift: newShift,
+        });
+        // restHoursBetweenShifts should compute newShift.startTime minus prevShift.endTime
+        if (restHours < 11) {
+          return false;
+        }
+      }
+    }
+
+    // 3) Rest before next-day shift
+    if (rota.has(nextDay)) {
+      const nextShiftsMap = rota.get(nextDay)!;
+      const nextShifts = Array.from(nextShiftsMap.values()).filter(
+        (s) => s.employee === employee.id
+      );
+      for (const nextShift of nextShifts) {
+        const restHours = restHoursBetweenShifts({
+          prevShift: newShift,
+          shift: nextShift,
+        });
+        if (restHours < 11) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  });
 };
