@@ -200,7 +200,6 @@ export const makeUpdatedShift = (
   original: Shift,
   employeeId: string | null
 ): Shift => {
-  console.log({ employeeId, original });
   return {
     ...original,
     employee: employeeId ?? undefined,
