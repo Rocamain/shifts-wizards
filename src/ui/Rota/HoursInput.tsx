@@ -1,26 +1,40 @@
 interface HoursInputProps {
-  hours: string;
+  hours: number;
   onHoursChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  onViewChange: () => void;
 }
 
-export default function HoursInput({ hours, onHoursChange }: HoursInputProps) {
+export default function HoursInput({
+  hours,
+  onHoursChange,
+  onViewChange,
+}: HoursInputProps) {
   return (
-    <div>
-      <div className="flex justify-end bg-gray-200">
-        <div className="relative w-32 bg-gray-200 border border-gray-500 rounded px-7 py-6">
-          <div className="absolute w-4/5 -top-3 left-1/2 transform -translate-x-1/2 bg-gray-200 text-center px-2 text-gray-600">
-            <h3 className="font-semibold bg-gray-200"> Set Hours </h3>
-          </div>
-          <input
-            type="text"
-            value={hours}
-            onChange={onHoursChange}
-            maxLength={3}
-            pattern="\d*"
-            className="border border-gray-500 rounded px-4 py-2 w-[74px] text-center"
-          />
-        </div>
+    <form
+      className="flex flex-col items-center gap-4"
+      onSubmit={(e) => {
+        e.preventDefault();
+        onViewChange();
+      }}
+    >
+      <div className="flex">
+        <input
+          type="text"
+          value={hours}
+          onChange={onHoursChange}
+          maxLength={4}
+          pattern="\d*"
+          className="focus-within:shadow-lg border border-gray-500 rounded shadow-md px-4 py-2 text-center w-[80px]"
+        />
       </div>
-    </div>
+      <div>
+        <button
+          type="submit"
+          className="hover:underline px-4 py-2 rounded text-white bg-blue-500"
+        >
+          Set Shop Hours
+        </button>
+      </div>
+    </form>
   );
 }
