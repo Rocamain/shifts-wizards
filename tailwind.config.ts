@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import { ACCENT_COLORS, COLORS } from "./src/lib/employees/constants";
 
 export default {
   content: [
@@ -6,6 +7,7 @@ export default {
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/ui/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/lib/employees/constants.ts",
   ],
   theme: {
     extend: {
@@ -15,5 +17,6 @@ export default {
       },
     },
   },
+  safelist: [...COLORS, ...ACCENT_COLORS],
   plugins: [],
 } satisfies Config;
