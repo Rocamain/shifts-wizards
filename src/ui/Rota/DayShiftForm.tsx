@@ -25,16 +25,12 @@ export default function DayShiftForm({ day, isChecked }: DayShiftFormProps) {
     .split("/")[2]
     .toUpperCase() as EmployeeRole;
 
-  // ────────────────────────────────────────────────
-  // derive the daily limits once
-  // ────────────────────────────────────────────────
   const dayTimes = openingTimes[day];
-  const earliestOpen = dayTimes[1]; //  e.g. "09:00"
-  const latestStart = dayTimes.at(-2)!; //  last allowed start
-  const earliestEnd = dayTimes[2]; //  first allowed end
-  const latestClose = dayTimes.at(-1)!; //  e.g. "18:00"
+  const earliestOpen = dayTimes[1];
+  const latestStart = dayTimes.at(-2)!;
+  const earliestEnd = dayTimes[2];
+  const latestClose = dayTimes.at(-1)!;
 
-  // state
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
 
@@ -60,8 +56,6 @@ export default function DayShiftForm({ day, isChecked }: DayShiftFormProps) {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    // basic chronological guard
     if (!startTime || !endTime || toMillis(startTime) >= toMillis(endTime)) {
       alert("Start must be before end.");
       return;
@@ -80,7 +74,6 @@ export default function DayShiftForm({ day, isChecked }: DayShiftFormProps) {
       .map((emp) => emp.id);
 
     addShift(day, newShift);
-
     setStartTime("");
     setEndTime("");
   };
@@ -88,15 +81,15 @@ export default function DayShiftForm({ day, isChecked }: DayShiftFormProps) {
   return (
     <form className="pt-4 pb-3" onSubmit={handleSubmit}>
       <div className="flex items-end gap-2">
-        <div>
-          <label htmlFor="Time-start" className="mr-2">
-            Start
+        <div className="relative w-[60px]">
+          <label htmlFor="Time-start" className="sr-only">
+            Start time
           </label>
           <input
             id="Time-start"
             type="time"
             required
-            className="border border-gray-300 py-1 rounded-md text-center w-[60px]"
+            className="peer border border-gray-300 py-1 rounded-md text-center w-full bg-white"
             min={earliestOpen}
             max={latestStart}
             step={QUARTER_HOUR}
@@ -105,17 +98,22 @@ export default function DayShiftForm({ day, isChecked }: DayShiftFormProps) {
             onChange={handleStartChange}
             onBlur={roundOnBlur(setStartTime)}
           />
+          {startTime === "" && (
+            <span className="pointer-events-none bg-white absolute top-[6px] left-0 w-full text-center text-gray-400 text-sm peer-focus:invisible">
+              Start
+            </span>
+          )}
         </div>
 
-        <div>
-          <label htmlFor="Time-end" className="mr-2">
-            End
+        <div className="relative w-[60px]">
+          <label htmlFor="Time-end" className="sr-only">
+            End time
           </label>
           <input
             id="Time-end"
             type="time"
             required
-            className="border border-gray-300 py-1 rounded-md text-center w-[60px]"
+            className="peer border border-gray-300 py-1 rounded-md text-center w-full bg-white"
             min={earliestEnd}
             max={latestClose}
             step={QUARTER_HOUR}
@@ -124,6 +122,11 @@ export default function DayShiftForm({ day, isChecked }: DayShiftFormProps) {
             onChange={handleEndChange}
             onBlur={roundOnBlur(setEndTime)}
           />
+          {endTime === "" && (
+            <span className="pointer-events-none bg-white absolute top-[6px] left-0 w-full text-center text-gray-400 text-sm peer-focus:invisible">
+              End
+            </span>
+          )}
         </div>
 
         <button
