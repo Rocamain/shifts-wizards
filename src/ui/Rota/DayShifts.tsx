@@ -9,6 +9,7 @@ import DayShiftsGrid from "./DayShiftsGrid";
 import DayShiftForm from "./DayShiftForm";
 import DayShiftsSummary from "./DayShiftSummary";
 import { getDayhours } from "@/lib/rota/utils";
+import { usePathname } from "next/navigation";
 
 type DayShiftsProps = {
   day: Weekday;
@@ -19,7 +20,9 @@ export default function DayShifts({ day }: DayShiftsProps) {
   const { week, replaceDay } = useRotaContext();
   const { openingTimes } = useOpeningTimesContext();
   const { selectedEmployees } = useEmployeeContext();
-
+  const pathname = usePathname();
+  const isPathRoleTL = pathname.split("/")[2]?.toUpperCase() === "FULL";
+  console.log("isPathRoleTL", isPathRoleTL);
   if (day >= 0) {
     const dayShifts = week.get(day)!;
     const handleDeleteShift = (shiftId: string) => {
@@ -44,7 +47,7 @@ export default function DayShifts({ day }: DayShiftsProps) {
             totalHours={getDayhours(Array.from(dayShifts.values()) as Shift[])}
             toggleChecked={setIsChecked}
           />
-          <DayShiftForm day={day} isChecked={isChecked} />
+          {!isPathRoleTL && <DayShiftForm day={day} isChecked={isChecked} />}
           <div className="flex-1">
             <DayShiftsGrid
               shifts={filteredShifts}
