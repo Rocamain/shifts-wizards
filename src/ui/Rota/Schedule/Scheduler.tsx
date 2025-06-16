@@ -2,10 +2,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { useEmployeeContext } from "@/lib/employees/context/EmployeeContext";
 import { useRotaContext } from "@/lib/rota/context/RotaContexts";
-import { Shift, Week } from "@/lib/rota/rota";
+import { Shift, Week, Weekday } from "@/lib/rota/rota";
 import { Employee } from "@/lib/employees/employees";
 import WeightControls from "../WeightControls";
 import { isEmployeeAvailableForShift } from "@/lib/rota/utils";
+import { useRestPriorityContext } from "@/lib/rota/context/RestPriorityContext";
 
 /** Return true if any day-map in the week has at least one shift. */
 function hasAnyShifts(week: Week): boolean {
@@ -20,35 +21,37 @@ export default function Scheduler() {
   const { employees, addShiftToEmployee, resetHoursToEmployees } =
     useEmployeeContext();
   const [submitted, setSubmitted] = useState(false);
-  const [restPriority, setRestPriority] = useState(3);
+  const { restPriority, setRestPriority } = useRestPriorityContext();
 
   const fetchRota = useCallback(
     async (weekData: Week, staff: Employee[]) => {
       const weeklyRota: Shift[][] = Array.from({ length: 7 }, (_, day) => {
-        const dayMap = weekData.get(day) ?? new Map<string, Shift>();
+        const dayMap = weekData.get(day as Weekday) ?? new Map<string, Shift>();
         return Array.from(dayMap.values())
-          .map((s) => ({ ...s, day }))
+          .map((s) => ({ ...s, day: day as Weekday }))
           .filter((shift) => !shift.employee);
       });
+
       const weeklyRotaAssigned: Shift[][] = Array.from(
         { length: 7 },
         (_, day) => {
-          const dayMap = weekData.get(day) ?? new Map<string, Shift>();
+          const dayMap =
+            weekData.get(day as Weekday) ?? new Map<string, Shift>();
           return Array.from(dayMap.values())
-            .map((s) => ({ ...s, day }))
+            .map((s) => ({ ...s, day: day as Weekday }))
             .filter((shift) => shift.employee);
         }
       );
 
       // nothing to do
       if (weeklyRota.every((arr) => arr.length === 0)) return;
-      const resp = await fetch("http://localhost:5000/api/schedule", {
+      const resp = await fetch("/api/schedule", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           shifts: weeklyRota,
           employees: staff,
-          restPriority, // include slider value 1–5
+          restPriority,
         }),
       });
 
@@ -60,7 +63,7 @@ export default function Scheduler() {
 
       // Build new Week
       const returned: Shift[][] = json.shifts;
-
+      console.log("restPriority:", restPriority, "returned:", returned);
       const newWeek: Week = new Map();
       returned.forEach((dayArr, day) => {
         const array = [...dayArr, ...weeklyRotaAssigned[day]].map((shift) => {
@@ -71,7 +74,7 @@ export default function Scheduler() {
         });
         const m = new Map<string, Shift>();
         array.forEach((sh) => m.set(sh.id, sh));
-        newWeek.set(day, m);
+        newWeek.set(day as Weekday, m);
       });
       resetHoursToEmployees();
       addApiShifs(newWeek);
@@ -97,21 +100,21 @@ export default function Scheduler() {
       .catch(console.error)
       .finally(() => setSubmitted(false));
   }, [submitted, fetchRota, initialWeek, employees]);
-
   return (
     <div className="w-[190px] mx-auto h-[200px] border-2 border-gray-300 p-4 rounded-lg shadow-md p-4">
       <h3 className="text-lg font-semibold text-gray-700 mb-3">
         Consecutive Rest
       </h3>
-      <div className="flex flex-col items-center gap-4">
+      <div className="flex flex-col items-center gap-[30px] h-[122px]">
         <WeightControls value={restPriority} onChange={setRestPriority} />
-
-        <button
-          className="mt-2 hover:underline px-4 py-2 rounded text-white bg-blue-500"
-          onClick={() => setSubmitted(true)}
-        >
-          Resolve Shifts
-        </button>
+        <div>
+          <button
+            className="hover:underline px-4 py-2 rounded text-white bg-blue-500"
+            onClick={() => setSubmitted(true)}
+          >
+            Resolve Shifts
+          </button>
+        </div>
       </div>
     </div>
   );
