@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { Employee } from "@/lib/employees/employees";
+import clsx from "clsx";
 
 interface EmployeeTableProps {
   employees: Employee[];
@@ -21,6 +22,8 @@ export default function EmployeeTable({
           <th className="p-2 text-left">Total Assigned Shifts</th>
           <th className="p-2 text-left">Contract Hours</th>
           <th className="p-2 text-left">Total Worked Hours</th>
+
+          <th className="p-2 text-left">Unavaliable Times</th>
           <th className="p-2 text-left">Role</th>
           <th className="p-2 text-left">Actions</th>
         </tr>
@@ -36,7 +39,21 @@ export default function EmployeeTable({
               <span className="ml-1">{employee.contractHours}</span>
             </td>
             <td className="p-2">
-              <span className="ml-1">{employee.totalWorkedHours}</span>
+              <span
+                className={clsx(
+                  "font-semibold",
+                  employee.totalWorkedHours - employee.contractHours >= 0
+                    ? "text-green-600"
+                    : "text-red-600"
+                )}
+              >
+                {employee.totalWorkedHours}
+              </span>
+            </td>
+            <td className="p-2">
+              <span className="ml-1">
+                {employee.unavailableDates.length > 0 ? "✔️ " : ""}
+              </span>
             </td>
             <td className="p-2">
               <span className="ml-1">{employee.role}</span>
