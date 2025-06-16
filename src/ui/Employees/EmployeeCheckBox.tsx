@@ -60,16 +60,18 @@ export default function EmployeeCheckBox({
         <Link
           href={`/employees/${employee.id}`}
           onClick={(e) => e.stopPropagation()}
-          className="block pl-1 py-1 pr-2"
+          className="block pl-1 py-1 pr-2 truncate"
         >
           {employee.name}
         </Link>
       </label>
 
       {/* Hours aligned */}
-      <span className={`${fontColor} font-semibold flex-shrink-0`}>
-        {employee.totalWorkedHours}h
-      </span>
+      <div>
+        <span className={`${fontColor} font-semibold flex-shrink-0`}>
+          {employee.totalWorkedHours}h
+        </span>
+      </div>
     </div>
   );
 }
