@@ -1,6 +1,7 @@
 "use client";
 import { useRef } from "react";
 import WeekDay from "./WeekDay";
+import { Weekday } from "@/lib/rota/rota";
 
 export default function WeeklyRota() {
   // 1) a ref to our scrollable container
@@ -25,7 +26,7 @@ export default function WeeklyRota() {
       {/* The scrollable row */}
       <div ref={scroller} className="flex flex-nowrap overflow-x-auto px-12">
         {[0, 1, 2, 3, 4, 5, 6].map((d) => (
-          <WeekDay key={d} day={d} />
+          <WeekDay key={d} day={d as Weekday} />
         ))}
       </div>
 
