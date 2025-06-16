@@ -22,7 +22,6 @@ export type Weekday = (typeof Weekday)[keyof typeof Weekday];
 
 export type EmployeeRole = "TL" | "CTM" | "BAKER";
 
-export type Weekday = (typeof Weekday)[keyof typeof Weekday];
 export type DayShiftsMap = Map<string, Shift>;
 
 export type Week = Map<Weekday, DayShiftsMap>;
