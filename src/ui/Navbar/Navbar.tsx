@@ -14,8 +14,13 @@ export default function Navbar() {
             </Link>
           </li>
           <li>
-            <Link href="/rota" className="hover:underline">
+            <Link href="/rota/full" className="hover:underline">
               Create Rota
+            </Link>
+          </li>
+          <li>
+            <Link href="/rota" className="hover:underline">
+              Publish Rota
             </Link>
           </li>
         </ul>
