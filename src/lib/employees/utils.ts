@@ -2,7 +2,7 @@ import { COLORS, ACCENT_COLORS } from "./constants";
 import { Employee } from "./employees";
 import { EMPLOYEES } from "./constants";
 import { getDayhours, restHoursBetweenShifts } from "../rota/utils";
-import { Shift, Week } from "../rota/rota";
+import { Shift, Week, Weekday } from "../rota/rota";
 import { MAX_HOURS_PER_DAY } from "../rota/constants";
 
 export const getEmployeeColor = (id: string): string => {
@@ -167,8 +167,8 @@ export const getAvailableEmployees = (
     }
 
     // 2) Rest after previous-day shift
-    if (rota.has(prevDay)) {
-      const prevShiftsMap = rota.get(prevDay)!;
+    if (rota.has(prevDay as Weekday)) {
+      const prevShiftsMap = rota.get(prevDay as Weekday)!;
       // find any shift on prevDay assigned to this employee
       const prevShifts = Array.from(prevShiftsMap.values()).filter(
         (s) => s.employee === employee.id
@@ -186,8 +186,8 @@ export const getAvailableEmployees = (
     }
 
     // 3) Rest before next-day shift
-    if (rota.has(nextDay)) {
-      const nextShiftsMap = rota.get(nextDay)!;
+    if (rota.has(nextDay as Weekday)) {
+      const nextShiftsMap = rota.get(nextDay as Weekday)!;
       const nextShifts = Array.from(nextShiftsMap.values()).filter(
         (s) => s.employee === employee.id
       );
