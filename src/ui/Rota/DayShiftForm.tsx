@@ -79,9 +79,9 @@ export default function DayShiftForm({ day, isChecked }: DayShiftFormProps) {
   };
 
   return (
-    <form className="pt-4 pb-3" onSubmit={handleSubmit}>
+    <form className="mb-4" onSubmit={handleSubmit}>
       <div className="flex items-end gap-2">
-        <div className="relative w-[60px]">
+        <div className="relative w-[65px]">
           <label htmlFor="Time-start" className="sr-only">
             Start time
           </label>
@@ -99,13 +99,13 @@ export default function DayShiftForm({ day, isChecked }: DayShiftFormProps) {
             onBlur={roundOnBlur(setStartTime)}
           />
           {startTime === "" && (
-            <span className="pointer-events-none bg-white absolute top-[6px] left-0 w-full text-center text-gray-400 text-sm peer-focus:invisible">
+            <span className="pointer-events-none bg-white absolute top-[6px] left-3 w-[40px] mx-auto text-center text-gray-400 text-sm peer-focus:invisible">
               Start
             </span>
           )}
         </div>
 
-        <div className="relative w-[60px]">
+        <div className="relative w-[65px]">
           <label htmlFor="Time-end" className="sr-only">
             End time
           </label>
@@ -123,7 +123,7 @@ export default function DayShiftForm({ day, isChecked }: DayShiftFormProps) {
             onBlur={roundOnBlur(setEndTime)}
           />
           {endTime === "" && (
-            <span className="pointer-events-none bg-white absolute top-[6px] left-0 w-full text-center text-gray-400 text-sm peer-focus:invisible">
+            <span className="pointer-events-none bg-white absolute top-[6px] left-3 w-[40px] mx-auto text-center text-gray-400 text-sm peer-focus:invisible">
               End
             </span>
           )}
