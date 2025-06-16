@@ -24,6 +24,7 @@ interface EmployeeContextType {
   removeEmployee: (employeeId: string) => void;
   filterSelectedEmployees: (employeesToFilter: string[]) => void;
   resetHoursToEmployees: () => void;
+  updateEmployee: (employeeId: string, updatedData: Partial<Employee>) => void;
 }
 
 const EmployeeContext = createContext<EmployeeContextType | undefined>(
@@ -144,6 +145,20 @@ export const EmployeeProvider: React.FC<{ children: React.ReactNode }> = ({
     },
     []
   );
+
+  const updateEmployee = useCallback(
+    (employeeId: string, updatedData: Partial<Employee>) => {
+      setEmployees((prev) =>
+        prev.map((employee) =>
+          employee.id === employeeId
+            ? { ...employee, ...updatedData }
+            : employee
+        )
+      );
+    },
+    []
+  );
+
   return (
     <EmployeeContext.Provider
       value={{
@@ -157,6 +172,7 @@ export const EmployeeProvider: React.FC<{ children: React.ReactNode }> = ({
         removeEmployee,
         filterSelectedEmployees,
         resetHoursToEmployees,
+        updateEmployee,
       }}
     >
       {children}
