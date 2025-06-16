@@ -151,9 +151,9 @@ export const rotaMapToArray = (week?: Week): Shift[][] => {
   );
 };
 export const serializeWeek = (week: Week): string => {
-  const serializable = Array.from(week.entries()).map(([, shiftMap]) => [
-    Array.from(shiftMap.entries()),
-  ]);
+  const serializable: [Weekday, [string, Shift][]][] = Array.from(
+    week.entries()
+  ).map(([day, shiftMap]) => [day, Array.from(shiftMap.entries())]);
   return JSON.stringify(serializable);
 };
 
