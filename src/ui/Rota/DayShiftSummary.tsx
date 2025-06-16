@@ -108,21 +108,9 @@ export default function DayShiftsSummary({
               <p className="font-semibold">{shiftCount}</p>
             </div>
           </div>
-
-          {/* <div className="flex">
-          <input
-            type="checkbox"
-            checked={isChecked}
-            onChange={(e) => toggleChecked(e.target.checked)}
-            className="mr-1 rounded-sm"
-          />
-          <label htmlFor="modify-times" className="block text-sm">
-            Set Times
-          </label>
-        </div> */}
         </div>
       </div>
-      <label className="inline-flex space-x-4 items-center cursor-pointer ">
+      <label className="inline-flex space-x-4 items-center cursor-pointer mb-4 ">
         <span className="text-md font-semibold text-gray-900 dark:text-gray-300">
           Schedule times
         </span>
