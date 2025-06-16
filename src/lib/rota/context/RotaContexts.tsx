@@ -155,6 +155,7 @@ export const RotaProvider: React.FC<{ children: React.ReactNode }> = ({
     const blankedWeek = clearShiftAssignments(weekObj);
     resetHoursToEmployees();
     dispatch({ type: "LOAD_WEEK", week: blankedWeek });
+    alert("Template loaded successfully!");
   }, [resetHoursToEmployees]);
 
   const saveToTemplate = useCallback(() => {
@@ -165,8 +166,10 @@ export const RotaProvider: React.FC<{ children: React.ReactNode }> = ({
           new Map(sortDayGroupedByRole(dayMap)),
         ])
       );
+      console.log("Saving to template", serializeWeek(sortingWeek));
       resetHoursToEmployees();
       localStorage.setItem("template-shifts", serializeWeek(sortingWeek));
+      alert("Template saved successfully!");
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
