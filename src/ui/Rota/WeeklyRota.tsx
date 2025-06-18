@@ -1,42 +1,74 @@
 "use client";
-import { useRef } from "react";
+
+import { useRef, useState, useEffect } from "react";
 import WeekDay from "./WeekDay";
 import { Weekday } from "@/lib/rota/rota";
+import { useRotaContext } from "@/lib/rota/context/RotaContexts";
 
 export default function WeeklyRota() {
-  // 1) a ref to our scrollable container
   const scroller = useRef<HTMLDivElement>(null);
+  const { week } = useRotaContext();
 
-  // 2) handlers that nudge it left or right
-  const scrollBy = (distance: number) => {
-    if (!scroller.current) return;
-    scroller.current.scrollBy({ left: distance, behavior: "smooth" });
-  };
+  const [canScroll, setCanScroll] = useState(false);
+
+  // check overflow whenever content or window size changes
+  useEffect(() => {
+    const el = scroller.current;
+    if (!el) return;
+
+    const check = () => {
+      setCanScroll(el.scrollWidth > el.clientWidth);
+    };
+
+    check();
+    window.addEventListener("resize", check);
+
+    return () => {
+      window.removeEventListener("resize", check);
+    };
+  }, [week]); // re-run when 'week' data changes
+
+  const scrollBy = (distance: number) =>
+    scroller.current?.scrollBy({ left: distance, behavior: "smooth" });
+
+  const days = [0, 1, 2, 3, 4, 5, 6] as Weekday[];
+
+  const cols = days
+    .map((d) => ((week.get(d)?.size ?? 0) > 0 ? "auto" : "1fr"))
+    .join(" ");
 
   return (
-    <div className="relative">
-      {/* Left chevron */}
-      <button
-        onClick={() => scrollBy(-300)}
-        className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow"
-      >
-        ❮
-      </button>
+    <div className="relative overflow-visible">
+      {canScroll && (
+        <button
+          onClick={() => scrollBy(-300)}
+          className="absolute -left-12 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow h-10 w-10 flex items-center justify-center"
+        >
+          ❮
+        </button>
+      )}
 
-      {/* The scrollable row */}
-      <div ref={scroller} className="flex flex-nowrap overflow-x-auto px-12">
-        {[0, 1, 2, 3, 4, 5, 6].map((d) => (
-          <WeekDay key={d} day={d as Weekday} />
-        ))}
+      <div ref={scroller} className="overflow-x-auto scrollbar-hide">
+        <div
+          className="grid auto-rows-auto divide-x divide-gray-400 border border-gray-500"
+          style={{ gridTemplateColumns: cols, minWidth: "100%" }}
+        >
+          {days.map((d) => (
+            <div key={d} className="flex-1 basis-0 flex flex-col">
+              <WeekDay day={d as Weekday} />
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Right chevron */}
-      <button
-        onClick={() => scrollBy(300)}
-        className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow"
-      >
-        ❯
-      </button>
+      {canScroll && (
+        <button
+          onClick={() => scrollBy(300)}
+          className="absolute -right-12 top-1/2 -translate-y-1/2 z-10 p-2 bg-white rounded-full shadow h-10 w-10 flex items-center justify-center"
+        >
+          ❯
+        </button>
+      )}
     </div>
   );
 }
