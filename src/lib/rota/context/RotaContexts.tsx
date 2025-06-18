@@ -7,6 +7,7 @@ import React, {
   useMemo,
   useCallback,
   useEffect,
+  useState,
 } from "react";
 import { Week, Weekday, Shift, DayShiftsMap, EmployeeRole } from "../rota";
 import { INITIAL_WEEK } from "../constants";
@@ -19,6 +20,7 @@ import {
 } from "../utils";
 import { usePathname } from "next/navigation";
 import { useEmployeeContext } from "@/lib/employees/context/EmployeeContext";
+import AlertModal from "@/ui/Other/AlertModal";
 
 interface RotaState {
   week: Week;
@@ -98,7 +100,7 @@ export const RotaProvider: React.FC<{ children: React.ReactNode }> = ({
     week: INITIAL_WEEK,
     status: "saved",
   });
-
+  const [alertMessage, setAlertMessage] = useState<string | null>(null); // modal state
   const pathname = usePathname();
 
   useEffect(() => {}, [state.week, state.status, resetHoursToEmployees]);
@@ -118,7 +120,7 @@ export const RotaProvider: React.FC<{ children: React.ReactNode }> = ({
         dispatch({ type: "ADD_SHIFT", day, shift: completeShift });
       }
       if (isOverLegalWorkingHours) {
-        alert("Shift hours exceed 13 hours");
+        setAlertMessage("Shift hours exceed 13 hours");
       }
     },
     [pathname]
@@ -130,7 +132,7 @@ export const RotaProvider: React.FC<{ children: React.ReactNode }> = ({
       dispatch({ type: "UPDATE_SHIFT", day, shift });
     }
     if (isOverLegalWorkingHours) {
-      alert("Shift hours exceed 13 hours");
+      setAlertMessage("Shift hours exceed 13 hours");
     }
   }, []);
 
@@ -155,7 +157,7 @@ export const RotaProvider: React.FC<{ children: React.ReactNode }> = ({
     const blankedWeek = clearShiftAssignments(weekObj);
     resetHoursToEmployees();
     dispatch({ type: "LOAD_WEEK", week: blankedWeek });
-    alert("Template loaded successfully!");
+    setAlertMessage("Template loaded successfully");
   }, [resetHoursToEmployees]);
 
   const saveToTemplate = useCallback(() => {
@@ -166,13 +168,10 @@ export const RotaProvider: React.FC<{ children: React.ReactNode }> = ({
           new Map(sortDayGroupedByRole(dayMap)),
         ])
       );
-      console.log("Saving to template", serializeWeek(sortingWeek));
       resetHoursToEmployees();
       localStorage.setItem("template-shifts", serializeWeek(sortingWeek));
-      alert("Template saved successfully!");
+      setAlertMessage("Template saved successfully");
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [resetHoursToEmployees, state.status, state.week]);
 
   const value = useMemo<RotaContextType>(
@@ -198,7 +197,17 @@ export const RotaProvider: React.FC<{ children: React.ReactNode }> = ({
     ]
   );
 
-  return <RotaContext.Provider value={value}>{children}</RotaContext.Provider>;
+  return (
+    <RotaContext.Provider value={value}>
+      {children}
+      {alertMessage && (
+        <AlertModal
+          message={alertMessage}
+          onClose={() => setAlertMessage(null)}
+        />
+      )}
+    </RotaContext.Provider>
+  );
 };
 
 export const useRotaContext = (): RotaContextType => {
