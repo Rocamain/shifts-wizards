@@ -22,6 +22,7 @@ export interface UnassignedShiftEmployee {
   name: "Unassigned";
   color: "bg-gray-500";
   totalWorkedHours: number;
+  assignedShifts: Shift[];
   contractHours: number;
   isBaker: boolean;
 }
