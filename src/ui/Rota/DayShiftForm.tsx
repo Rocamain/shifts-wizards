@@ -11,6 +11,7 @@ import {
 } from "@/lib/rota/utils";
 import { QUARTER_HOUR } from "@/lib/rota/constants";
 import { ChangeEvent, FocusEvent, useState } from "react";
+import AlertModal from "../Other/AlertModal";
 
 type DayShiftFormProps = {
   day: Weekday;
@@ -24,6 +25,7 @@ export default function DayShiftForm({ day, isChecked }: DayShiftFormProps) {
   const employeeRole = usePathname()
     .split("/")[2]
     .toUpperCase() as EmployeeRole;
+  const [alertOpen, setAlertOpen] = useState(false);
 
   const dayTimes = openingTimes[day];
   const earliestOpen = dayTimes[1];
@@ -57,10 +59,9 @@ export default function DayShiftForm({ day, isChecked }: DayShiftFormProps) {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!startTime || !endTime || toMillis(startTime) >= toMillis(endTime)) {
-      alert("Start must be before end.");
+      setAlertOpen(true);
       return;
     }
-
     const newShift: Shift = {
       day,
       startTime,
@@ -79,69 +80,78 @@ export default function DayShiftForm({ day, isChecked }: DayShiftFormProps) {
   };
 
   return (
-    <form className="mb-4" onSubmit={handleSubmit}>
-      <div className="flex items-end gap-2">
-        <div className="relative w-[65px]">
-          <label htmlFor="Time-start" className="sr-only">
-            Start time
-          </label>
-          <input
-            id="Time-start"
-            type="time"
-            required
-            className="peer border border-gray-300 py-1 rounded-md text-center w-full bg-white"
-            min={earliestOpen}
-            max={latestStart}
-            step={QUARTER_HOUR}
-            disabled={!isChecked}
-            value={startTime}
-            onChange={handleStartChange}
-            onBlur={roundOnBlur(setStartTime)}
-          />
-          {startTime === "" && (
-            <span className="pointer-events-none bg-white absolute top-[6px] left-3 w-[40px] mx-auto text-center text-gray-400 text-sm peer-focus:invisible">
-              Start
-            </span>
-          )}
-        </div>
+    <>
+      {alertOpen && (
+        <AlertModal
+          message="Start must be before end."
+          onClose={() => setAlertOpen(false)}
+        />
+      )}
 
-        <div className="relative w-[65px]">
-          <label htmlFor="Time-end" className="sr-only">
-            End time
-          </label>
-          <input
-            id="Time-end"
-            type="time"
-            required
-            className="peer border border-gray-300 py-1 rounded-md text-center w-full bg-white"
-            min={earliestEnd}
-            max={latestClose}
-            step={QUARTER_HOUR}
-            disabled={!isChecked}
-            value={endTime}
-            onChange={handleEndChange}
-            onBlur={roundOnBlur(setEndTime)}
-          />
-          {endTime === "" && (
-            <span className="pointer-events-none bg-white absolute top-[6px] left-3 w-[40px] mx-auto text-center text-gray-400 text-sm peer-focus:invisible">
-              End
-            </span>
-          )}
-        </div>
+      <form className="mb-4" onSubmit={handleSubmit}>
+        <div className="flex items-end gap-2">
+          <div className="relative w-[65px]">
+            <label htmlFor="Time-start" className="sr-only">
+              Start time
+            </label>
+            <input
+              id="Time-start"
+              type="time"
+              required
+              className="peer border border-gray-300 py-1 rounded-md text-center w-full bg-white"
+              min={earliestOpen}
+              max={latestStart}
+              step={QUARTER_HOUR}
+              disabled={!isChecked}
+              value={startTime}
+              onChange={handleStartChange}
+              onBlur={roundOnBlur(setStartTime)}
+            />
+            {startTime === "" && (
+              <span className="pointer-events-none bg-white absolute top-[6px] left-3 w-[40px] mx-auto text-center text-gray-400 text-sm peer-focus:invisible">
+                Start
+              </span>
+            )}
+          </div>
 
-        <button
-          type="submit"
-          className="bg-blue-500 text-white rounded-md py-1 px-3 hover:bg-blue-600"
-          disabled={
-            !isChecked ||
-            !startTime ||
-            !endTime ||
-            toMillis(startTime) >= toMillis(endTime)
-          }
-        >
-          Add
-        </button>
-      </div>
-    </form>
+          <div className="relative w-[65px]">
+            <label htmlFor="Time-end" className="sr-only">
+              End time
+            </label>
+            <input
+              id="Time-end"
+              type="time"
+              required
+              className="peer border border-gray-300 py-1 rounded-md text-center w-full bg-white"
+              min={earliestEnd}
+              max={latestClose}
+              step={QUARTER_HOUR}
+              disabled={!isChecked}
+              value={endTime}
+              onChange={handleEndChange}
+              onBlur={roundOnBlur(setEndTime)}
+            />
+            {endTime === "" && (
+              <span className="pointer-events-none bg-white absolute top-[6px] left-3 w-[40px] mx-auto text-center text-gray-400 text-sm peer-focus:invisible">
+                End
+              </span>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            className="bg-blue-500 text-white rounded-md py-1 px-3 hover:bg-blue-600"
+            disabled={
+              !isChecked ||
+              !startTime ||
+              !endTime ||
+              toMillis(startTime) >= toMillis(endTime)
+            }
+          >
+            Add
+          </button>
+        </div>
+      </form>
+    </>
   );
 }
