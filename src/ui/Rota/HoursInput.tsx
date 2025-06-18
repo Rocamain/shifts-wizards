@@ -1,11 +1,11 @@
 interface HoursInputProps {
-  hours: number;
+  shopHours: number;
   onHoursChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onViewChange: () => void;
 }
 
 export default function HoursInput({
-  hours,
+  shopHours,
   onHoursChange,
   onViewChange,
 }: HoursInputProps) {
@@ -20,7 +20,7 @@ export default function HoursInput({
       <div className="flex">
         <input
           type="text"
-          value={hours}
+          value={shopHours}
           onChange={onHoursChange}
           maxLength={4}
           pattern="\d*"
@@ -30,7 +30,7 @@ export default function HoursInput({
       <div>
         <button
           type="submit"
-          className="hover:underline px-4 py-2 rounded text-white bg-blue-500"
+          className="hover:bg-blue-400 px-4 py-2 rounded text-white bg-blue-500"
         >
           Set Shop Hours
         </button>
