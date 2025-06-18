@@ -32,16 +32,16 @@ export default function Scheduler() {
           .filter((shift) => !shift.employee);
       });
 
-      const weeklyRotaAssigned: Shift[][] = Array.from(
-        { length: 7 },
-        (_, day) => {
-          const dayMap =
-            weekData.get(day as Weekday) ?? new Map<string, Shift>();
-          return Array.from(dayMap.values())
-            .map((s) => ({ ...s, day: day as Weekday }))
-            .filter((shift) => shift.employee);
-        }
-      );
+      const shiftsAssigned: Shift[][] = Array.from({ length: 7 }, (_, day) => {
+        const dayMap = weekData.get(day as Weekday) ?? new Map<string, Shift>();
+        return Array.from(dayMap.values())
+          .map((s) => ({ ...s, day: day as Weekday }))
+          .filter((shift) => shift.employee);
+      });
+      const staffWithDeductedContractHours = staff.map((emp) => ({
+        ...emp,
+        contractHours: emp.contractHours - emp.totalWorkedHours,
+      }));
 
       // nothing to do
       if (weeklyRota.every((arr) => arr.length === 0)) return;
@@ -50,7 +50,7 @@ export default function Scheduler() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           shifts: weeklyRota,
-          employees: staff,
+          employees: staffWithDeductedContractHours,
           restPriority,
         }),
       });
@@ -63,10 +63,9 @@ export default function Scheduler() {
 
       // Build new Week
       const returned: Shift[][] = json.shifts;
-      console.log("restPriority:", restPriority, "returned:", returned);
       const newWeek: Week = new Map();
       returned.forEach((dayArr, day) => {
-        const array = [...dayArr, ...weeklyRotaAssigned[day]].map((shift) => {
+        const array = [...dayArr, ...shiftsAssigned[day]].map((shift) => {
           shift.candidates = employees
             .filter((emp) => isEmployeeAvailableForShift(emp, shift))
             .map((emp) => emp.id);
@@ -109,7 +108,7 @@ export default function Scheduler() {
         <WeightControls value={restPriority} onChange={setRestPriority} />
         <div>
           <button
-            className="hover:underline px-4 py-2 rounded text-white bg-blue-500"
+            className="hover:bg-blue-400 px-4 py-2 rounded text-white bg-blue-500"
             onClick={() => setSubmitted(true)}
           >
             Resolve Shifts
