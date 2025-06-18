@@ -22,7 +22,7 @@ export default function DayShifts({ day }: DayShiftsProps) {
   const { selectedEmployees } = useEmployeeContext();
   const pathname = usePathname();
   const isPathRoleTL = pathname.split("/")[2]?.toUpperCase() === "FULL";
-  console.log("isPathRoleTL", isPathRoleTL);
+
   if (day >= 0) {
     const dayShifts = week.get(day)!;
     const handleDeleteShift = (shiftId: string) => {
@@ -48,6 +48,8 @@ export default function DayShifts({ day }: DayShiftsProps) {
             toggleChecked={setIsChecked}
           />
           {!isPathRoleTL && <DayShiftForm day={day} isChecked={isChecked} />}
+          <hr className="my-4 border-gray-600" />
+
           <div className="flex-1">
             <DayShiftsGrid
               shifts={filteredShifts}
