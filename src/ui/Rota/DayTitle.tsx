@@ -37,7 +37,7 @@ export default function DayTitle({ day }: DayTitleProps) {
     <>
       {isCurrentDay && routeBack && (
         <button
-          className="block absolute top-20 right-10 z-10 bg-blue-500 text-center font-bold text-white text-lg hover:underline px-4 py-2 rounded"
+          className="block absolute top-20 right-10 z-10 bg-blue-500 text-center font-bold text-white text-lg hover:bg-blue-400 px-4 py-2 rounded"
           onClick={() => router.push(routeBack)}
         >
           Back
