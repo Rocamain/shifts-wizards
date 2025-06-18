@@ -38,7 +38,11 @@ export default function RoleSection({
         <div className="grid grid-cols-3 gap-4 overflow-hidden whitespace-nowrap text-ellipsis border-2 border-gray-300 p-4 rounded-lg shadow-md p-4">
           {[unassigned, ...employees].map((emp) => (
             <div key={emp.id} className="relative flex justify-between ml-6">
-              <EmployeeCheckBox employee={emp} onCheckBox={onCheckBox} />
+              <EmployeeCheckBox
+                role={role}
+                employee={emp}
+                onCheckBox={onCheckBox}
+              />
             </div>
           ))}
         </div>
