@@ -1,5 +1,4 @@
 import { Employee } from "../employees/employees";
-import { INITIAL_WEEK } from "./constants";
 import { DayShiftsMap, EmployeeRole, Shift, Slot, Week, Weekday } from "./rota";
 
 export function generateHoursArray({
@@ -57,19 +56,6 @@ export const getWeekHours = ({
   return total;
 };
 
-export const calculateShiftHours = ({ endTime, startTime }: Shift) => {
-  const hours =
-    (new Date(`1970-01-01T${endTime}`).getTime() -
-      new Date(`1970-01-01T${startTime}`).getTime()) /
-    (1000 * 60 * 60);
-
-  if (hours < 8) {
-    return hours;
-  }
-
-  return hours - 0.5;
-};
-
 export const setGradient = (percentage: number) => {
   const arcAngle = (percentage / 100) * 360;
   if (arcAngle <= 0) {
@@ -125,31 +111,6 @@ export function isEmployeeAvailableForShift(employee: Employee, shift: Shift) {
   return false; // Employee does not have the required role
 }
 
-export const loadTemplates = (): Week => {
-  const JSON_TL_TEMPLATE = localStorage.getItem("tl-template");
-  const JSON_CTM_TEMPLATE = localStorage.getItem("ctm-template");
-  const JSON_BAKER_TEMPLATE = localStorage.getItem("baker-template");
-
-  if (JSON_TL_TEMPLATE && JSON_CTM_TEMPLATE && JSON_BAKER_TEMPLATE) {
-    const storedShifts = JSON.parse(JSON_TL_TEMPLATE) as Week;
-
-    return storedShifts;
-  } else {
-    localStorage.setItem("intial_week", JSON.stringify(INITIAL_WEEK));
-
-    return INITIAL_WEEK;
-  }
-};
-
-export const rotaMapToArray = (week?: Week): Shift[][] => {
-  if (!week) {
-    console.warn("rotaMapToArray called with undefined week");
-    return [];
-  }
-  return Array.from(week.values()).map((shiftMap) =>
-    Array.from(shiftMap.values())
-  );
-};
 export const serializeWeek = (week: Week): string => {
   const serializable: [Weekday, [string, Shift][]][] = Array.from(
     week.entries()
@@ -202,57 +163,11 @@ export const makeUpdatedShift = (
 ): Shift => {
   return {
     ...original,
-    employee: employeeId ?? undefined,
+    employee: employeeId ?? original.employee,
     finalCandidate: employeeId,
-    candidates: employeeId ? [employeeId] : undefined,
+    candidates: employeeId ? [employeeId] : original.candidates,
   };
 };
-
-export function canDoShift(employee: Employee, shift: Shift) {
-  if (
-    shift.employeeRole === employee.role ||
-    (shift.employeeRole === "BAKER" && employee.isBaker)
-  ) {
-    for (const unavailable of employee.unavailableDates) {
-      if (unavailable.day === shift.day) {
-        const shiftStart = new Date(`1970-01-01T${shift.startTime}`).getTime();
-        const shiftEnd = new Date(`1970-01-01T${shift.endTime}`).getTime();
-
-        const unavailableStart = new Date(
-          `1970-01-01T${unavailable.timeFrame.start}`
-        ).getTime();
-        const unavailableEnd = new Date(
-          `1970-01-01T${unavailable.timeFrame.end}`
-        ).getTime();
-
-        // Check for overlap
-        if (
-          (shiftStart < unavailableEnd && shiftEnd > unavailableStart) || // Shift overlaps with unavailable period
-          shiftStart === unavailableStart || // Exact match at start
-          shiftEnd === unavailableEnd // Exact match at end
-        ) {
-          return false; // Shift is not available
-        }
-      }
-    }
-    return true; // If no overlap is found, the shift is available
-  }
-  return false; // Employee does not have the required role
-}
-
-export function addCandidatesToShift(
-  employees: Employee[],
-  shift: Shift
-): Shift {
-  shift.candidates = employees.reduce<string[]>((acc, employee) => {
-    if (isEmployeeAvailableForShift(employee, shift)) {
-      acc.push(employee.id);
-    }
-    return acc; // Ensure the accumulator is returned
-  }, []);
-
-  return shift;
-}
 
 export const clampTime = (
   prevTime: string,
@@ -342,6 +257,48 @@ export function shiftHours(shift: Shift): number {
 
   return hours - 0.5;
 }
+/**
+ * Calculate the paid hours for a single shift.
+ * – Handles shifts that cross midnight.
+ * – Deducts a 30-minute break once if the gross duration exceeds 8 hours.
+ * – Rounds to two decimal places.
+ */
+export function calculateShiftHours(shift: Shift): number {
+  const [h1, m1] = shift.startTime.split(":").map(Number);
+  const [h2, m2] = shift.endTime.split(":").map(Number);
+
+  // eslint-disable-next-line prefer-const
+  let startMin = h1 * 60 + m1;
+  let endMin = h2 * 60 + m2;
+
+  if (endMin <= startMin) {
+    endMin += 24 * 60; // crosses midnight
+  }
+
+  const grossMin = endMin - startMin;
+  let hours = grossMin / 60;
+
+  // unpaid break if over 6h
+  if (hours >= 8) {
+    hours -= 0.5;
+  }
+
+  return Math.round(hours * 100) / 100;
+}
+
+export function calculateRoleShiftHours(
+  shifts: Shift[],
+  role: EmployeeRole
+): number {
+  return shifts
+    .filter((shift) => shift.employeeRole === role)
+    .map(calculateShiftHours)
+    .reduce((sum, h) => sum + h, 0);
+}
+
+/**
+ * Sum up paid hours over an array of shifts.
+ */
 
 export function restHoursBetweenShifts({
   prevShift,
@@ -367,29 +324,31 @@ export type RoleHours = {
 export function summarizeHoursByRole(
   week: Week
 ): Record<EmployeeRole, RoleHours> {
-  // initialize accumulators
+  // 1. Flatten all the shifts into a single array
+  const allShifts: Shift[] = Array.from(week.values()).flatMap((dayMap) =>
+    Array.from(dayMap.values())
+  );
+
+  // 2. Filter to only those shifts that have been assigned
+  const assignedShifts = allShifts.filter(
+    (s) => Boolean(s.employee) && s.employee !== "unassigned"
+  );
+
+  // 3. Prepare the output object
   const out: Record<EmployeeRole, RoleHours> = {
     TL: { total: 0, assigned: 0, remaining: 0 },
-    BAKER: { total: 0, assigned: 0, remaining: 0 },
     CTM: { total: 0, assigned: 0, remaining: 0 },
+    BAKER: { total: 0, assigned: 0, remaining: 0 },
   };
 
-  // walk every shift in every day
-  for (const dayMap of week.values()) {
-    for (const shift of dayMap.values()) {
-      const hrs = shiftHours(shift);
-      out[shift.employeeRole].total += hrs;
+  // 4. Compute totals per role via calculateRoleShiftHours
+  (["TL", "CTM", "BAKER"] as EmployeeRole[]).forEach((role) => {
+    const total = calculateRoleShiftHours(allShifts, role);
+    const assigned = calculateRoleShiftHours(assignedShifts, role);
+    const remaining = Math.round((total - assigned) * 100) / 100;
 
-      // Only count as assigned if shift.employee exists and is not "unassigned"
-      if (shift.employee && shift.employee !== "unassigned") {
-        out[shift.employeeRole].assigned += hrs;
-      }
-    }
-  }
+    out[role] = { total, assigned, remaining };
+  });
 
-  // compute remaining = total − assigned
-  for (const role of Object.keys(out) as EmployeeRole[]) {
-    out[role].remaining = out[role].total - out[role].assigned;
-  }
   return out;
 }

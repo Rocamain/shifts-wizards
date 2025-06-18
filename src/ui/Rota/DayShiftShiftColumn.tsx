@@ -6,7 +6,6 @@ import {
   EMOJI_BY_ROLE,
   UNASINGNED_BG_COLOR_BY_ROLE,
 } from "@/lib/employees/constants";
-// import { UNASINGNED_BG_COLOR_BY_ROLE } from "@/lib/rota/constants";
 
 type DayShiftShiftColumnProps = {
   shift: Shift;

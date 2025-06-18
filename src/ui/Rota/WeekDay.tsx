@@ -4,15 +4,16 @@ import { Weekday } from "@/lib/rota/rota";
 
 interface WeekDayProps {
   day: Weekday;
+  // hasShifts: boolean;
 }
 
-function WeekDay({ day }: WeekDayProps) {
+export default function WeekDay({ day }: WeekDayProps) {
   return (
-    <div className="flex-shrink-0 flex-grow flex flex-col border border-gray-600 min-w-[221px] max-w-fit overflow-hidden ">
+    <>
       <DayTitle day={day} />
-      <DayShifts day={day} />
-    </div>
+      <div className="mt-2 space-y-2">
+        <DayShifts day={day} />
+      </div>
+    </>
   );
 }
-
-export default WeekDay;
