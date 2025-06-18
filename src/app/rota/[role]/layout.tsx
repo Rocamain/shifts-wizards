@@ -2,6 +2,7 @@ import Templates from "@/ui/Rota/Templates";
 import EmployeeList from "@/ui/Employees/EmployeeList";
 import RouteSelector from "@/ui/Rota/RouteSelector";
 import ShopHours from "@/ui/Rota/ShopHours";
+import { notFound } from "next/navigation";
 
 type Params = Promise<{
   role: "CTM" | "TL" | "BAKER";
@@ -35,28 +36,44 @@ export const generateMetadata = async ({ params }: { params: Params }) => {
 
 export default async function LayoutRole({
   children,
+  params,
 }: {
   children: React.ReactNode;
   params: Params;
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
-  return (
-    <>
-      <div className="flex justify-end space-x-4">
-        <RouteSelector />
-      </div>
-      <div className="py-8 flex items-start justify-between flex-wrap">
-        <div className="w-[377px]">
-          <Templates />
+  const getRoleTitle: Map<string, string> = new Map([
+    ["ctm", "Customer Team Member's Rota"],
+    ["tl", "Team Leader's Rota"],
+    ["baker", "Bakers Rota"],
+    ["full", "General Rota"],
+  ]);
+  const { role } = await params;
+
+  const roleTitle = getRoleTitle.get(role.toLowerCase());
+  if (roleTitle)
+    return (
+      <>
+        <div className="flex justify-between mb-10 items-center mb-8">
+          <div>
+            <h2 className="text-3xl font-bold mb-4">{roleTitle}</h2>
+          </div>
+          <RouteSelector />
         </div>
-        <div className="">
-          <EmployeeList />
+        <div className="py-8 flex items-center gap-10 flex-wrap mb-8">
+          <div>
+            <EmployeeList />
+          </div>
+          <div>
+            <Templates />
+          </div>
+          <div>
+            <ShopHours />
+          </div>
         </div>
-        <div>
-          <ShopHours />
-        </div>
-      </div>
-      {children}
-    </>
-  );
+        {children}
+      </>
+    );
+
+  return notFound();
 }
