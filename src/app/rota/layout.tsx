@@ -10,11 +10,5 @@ export default function LayoutRota({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="mt-10 bg-gray-200">
-      <h2 className="text-2xl font-semibold">Shift Wizard Rota</h2>
-
-      {children}
-    </div>
-  );
+  return <div className="mt-10">{children}</div>;
 }
