@@ -19,7 +19,6 @@ const RestPriorityContext = createContext<RestPriorityContextType | undefined>(
 
 export const RestPriorityProvider = ({ children }: { children: ReactNode }) => {
   const [restPriority, setRestPriorityState] = useState<number>(() => 3);
-  console.log(restPriority);
   useEffect(() => {
     const stored = localStorage.getItem("rest-priority");
     if (stored !== null) {
