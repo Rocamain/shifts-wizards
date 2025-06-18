@@ -96,13 +96,6 @@ export const EmployeeProvider: React.FC<{ children: React.ReactNode }> = ({
     setEmployees((prev) => {
       const employees = prev.map((employee) => {
         if (employee.id === employeeId) {
-          console.log({
-            employeeId,
-            shift,
-            totalWorkedHours: employee.totalWorkedHours,
-            calculateShiftHours: calculateShiftHours(shift),
-          });
-
           return {
             ...employee,
             totalWorkedHours:
