@@ -146,11 +146,6 @@ function hasCapacity(employee: Employee, newShift: Shift) {
   return hoursWithNewShift(employee, newShift) <= MAX_HOURS_PER_DAY;
 }
 
-export const getEmployesWithoutTimeRestriction = (
-  employees: Employee[],
-  newShift: Shift
-) => employees.filter((employee) => hasCapacity(employee, newShift));
-
 export const getAvailableEmployees = (
   employees: Employee[],
   newShift: Shift,
