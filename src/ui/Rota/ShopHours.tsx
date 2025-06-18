@@ -10,10 +10,10 @@ import { ClockIcon, HomeIcon } from "@heroicons/react/24/outline";
 import Scheduler from "@/ui/Rota/Schedule/Scheduler";
 
 export default function ShopHours() {
-  const [hours, setHours] = useState<number>(0);
+  const [shopHours, setHours] = useState<number>(0);
   const [isInputView, setView] = useState<boolean>(true);
   const { week } = useRotaContext();
-  const weekHours = getWeekHours({ week });
+  const workingHours = getWeekHours({ week });
 
   const handleHoursChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value);
@@ -26,10 +26,12 @@ export default function ShopHours() {
     setView(!isInputView);
   };
 
-  const percentage = hours ? Math.min((hours / weekHours) * 100, weekHours) : 0;
+  const percentage = shopHours
+    ? Math.min((shopHours / workingHours) * 100, workingHours)
+    : 0;
   return (
     <Box title="Actions">
-      <div className="flex space-x-4 items-center justify-center">
+      <div className="flex space-x-6 items-center justify-center">
         <div className="w-[180px] mx-auto h-[200px] border-2 border-gray-300 p-4 rounded-lg shadow-md">
           <div className="flex justify-between gap-4 mb-4">
             <div
@@ -37,18 +39,18 @@ export default function ShopHours() {
               onClick={handleViewChange}
             >
               <ClockIcon className="h-5 w-5 text-blue-500" />
-              <p className="font-semibold">{weekHours}</p>
+              <p className="font-semibold">{workingHours}</p>
             </div>
             <div className="flex items-center gap-2">
               <HomeIcon className="h-5 w-5 text-blue-500" />
-              <p className="font-semibold">{hours}</p>
+              <p className="font-semibold">{shopHours}</p>
             </div>
           </div>
           <div className="">
             {isInputView && (
               <div className="">
                 <HoursInput
-                  hours={hours}
+                  shopHours={shopHours}
                   onViewChange={handleViewChange}
                   onHoursChange={handleHoursChange}
                 />

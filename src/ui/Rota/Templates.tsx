@@ -13,35 +13,33 @@ export default function Templates() {
 
   return (
     <Box title="Templates">
-      <div className="flex flex-col justify-center space-y-6 mb-4">
-        <div className="flex gap-4">
-          <button
-            onClick={() => {
-              loadTemplate();
-              alert("Template loaded");
-            }}
-            className="mt-2 hover:underline px-4 py-2 rounded text-white bg-blue-500"
-          >
-            {`${employeeRole.toUpperCase()} Template`}
-          </button>
-          <button
-            onClick={() => {
-              loadTemplate();
-            }}
-            className="mt-2 hover:underline px-4 py-2 rounded text-white bg-blue-500"
-          >
-            Full Template
-          </button>
-        </div>
-      </div>
-      <div className="flex justify-center">
+      {/* <div className="flex flex-col justify-center space-y-6 mb-4"> */}
+      <div className="h-[200px] flex flex-col gap-2 border-2 border-gray-300 p-4 rounded-lg shadow-md">
+        <button
+          onClick={() => {
+            loadTemplate();
+          }}
+          className="mt-2 hover:bg-blue-400 px-4 py-2 rounded text-white bg-blue-500"
+        >
+          {`${employeeRole.toUpperCase()} Template`}
+        </button>
+        <button
+          onClick={() => {
+            loadTemplate();
+          }}
+          className="mt-2 hover:bg-blue-400 px-4 py-2 rounded text-white bg-blue-500"
+        >
+          Full Template
+        </button>
+
         <button
           onClick={() => saveToTemplate()}
-          className="mt-2 hover:underline px-4 py-2 rounded text-white bg-blue-500"
+          className="mt-2 hover:bg-blue-400 px-4 py-2 rounded text-white bg-blue-500"
         >
           Add to Template
         </button>
       </div>
+      {/* </div> */}
     </Box>
   );
 }
