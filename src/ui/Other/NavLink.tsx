@@ -12,16 +12,13 @@ interface NavLinkProps {
 export default function NavLink({ href, children }: NavLinkProps) {
   const pathname = usePathname();
 
-  // Determine if the link is active (exact match or starts with the href)
   const isActive = pathname.startsWith(href);
 
-  // Preserve subpaths (e.g., /rota/CTM/Tuesday → /rota/TL/Tuesday)
-  const baseSegments = pathname.split("/").slice(3); // remove /rota/{role}
+  const baseSegments = pathname.split("/").slice(3);
   const additionalPath = baseSegments.length
     ? "/" + baseSegments.join("/")
     : "";
 
-  // Build the new link path with preserved subpath
   const newPath = `${href}${additionalPath}`;
 
   return (
@@ -30,7 +27,7 @@ export default function NavLink({ href, children }: NavLinkProps) {
       scroll={false}
       prefetch
       className={clsx(
-        "hover:underline px-4 py-2 rounded text-white shadow-xl",
+        "hover:bg-blue-400 px-4 py-2 rounded text-white shadow-xl",
         isActive ? "bg-blue-500" : "bg-gray-500"
       )}
     >
