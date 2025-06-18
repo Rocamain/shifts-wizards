@@ -40,13 +40,15 @@ export default function Drag({ children }: { children: React.ReactNode }) {
   return (
     <div className="fixed z-50 inset-0 bg-black bg-opacity-50 flex items-center justify-center">
       <div
-        className="absolute bg-white p-6 rounded-lg w-1/3 transform translate-x-[-50%] translate-y-[-50%] cursor-grab"
+        role="dialog"
+        aria-modal="true"
+        className="absolute bg-white p-6 rounded-2xl shadow-lg w-1/3 max-w-md mx-auto transform translate-x-[-50%] translate-y-[-50%] cursor-grab"
         style={{
           transform: `translate(${position.x}px, ${position.y}px)`,
         }}
         onMouseDown={handleMouseDown}
       >
-        <div>{children}</div>
+        {children}
       </div>
     </div>
   );
