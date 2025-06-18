@@ -64,15 +64,14 @@ export const EmployeeProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const addEmployee = useCallback((newEmployee: Employee) => {
-    const employeesWithColors = [...employees, newEmployee].map((employee) => ({
-      ...employee,
-      color: getEmployeeColor(employee.id),
-    }));
-
-    localStorage.setItem("employees", JSON.stringify(employeesWithColors));
-
-    setEmployees(employeesWithColors);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    setEmployees((prev) => {
+      const updated = [...prev, newEmployee].map((employee) => ({
+        ...employee,
+        color: getEmployeeColor(employee.id),
+      }));
+      localStorage.setItem("employees", JSON.stringify(updated));
+      return updated;
+    });
   }, []);
 
   const filterSelectedEmployees = useCallback(
@@ -97,6 +96,13 @@ export const EmployeeProvider: React.FC<{ children: React.ReactNode }> = ({
     setEmployees((prev) => {
       const employees = prev.map((employee) => {
         if (employee.id === employeeId) {
+          console.log({
+            employeeId,
+            shift,
+            totalWorkedHours: employee.totalWorkedHours,
+            calculateShiftHours: calculateShiftHours(shift),
+          });
+
           return {
             ...employee,
             totalWorkedHours:

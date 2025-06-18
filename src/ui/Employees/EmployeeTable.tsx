@@ -22,7 +22,6 @@ export default function EmployeeTable({
           <th className="p-2 text-left">Total Assigned Shifts</th>
           <th className="p-2 text-left">Contract Hours</th>
           <th className="p-2 text-left">Total Worked Hours</th>
-
           <th className="p-2 text-left">Unavaliable Times</th>
           <th className="p-2 text-left">Role</th>
           <th className="p-2 text-left">Actions</th>

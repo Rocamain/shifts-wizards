@@ -1,18 +1,19 @@
-// components/EmployeeCheckBox.tsx
-
 "use client";
 import { useEffect, useState, useCallback } from "react";
 import { Employee, UnassignedShiftEmployee } from "@/lib/employees/employees";
 import { useRotaContext } from "@/lib/rota/context/RotaContexts";
 import Link from "next/link";
+import { EmployeeRole } from "@/lib/rota/rota";
 
 type EmployeeCheckBoxProps = {
   employee: Employee | UnassignedShiftEmployee;
   onCheckBox: (employeeId: string, isChecked: boolean) => void;
+  role: EmployeeRole;
 };
 
 export default function EmployeeCheckBox({
   employee,
+  role,
   onCheckBox,
 }: EmployeeCheckBoxProps) {
   const [isChecked, setChecked] = useState(true);
@@ -21,7 +22,6 @@ export default function EmployeeCheckBox({
   useEffect(() => {
     setChecked(true);
   }, [week]);
-
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const checked = e.target.checked;
@@ -30,7 +30,6 @@ export default function EmployeeCheckBox({
     },
     [onCheckBox, employee.id]
   );
-
   const isPlaceholder = employee.id === "unassigned";
   const fontColor = isPlaceholder
     ? ""
