@@ -10,10 +10,7 @@ Features
 
 -   Design weekly rotas with drag‑and‑drop shifts, respecting shop opening hours.
 
--   Auto‑assign remaining shifts by hitting `/api/schedule`, which calls the Flask service while applying rate limiting and reading environment variables `FLASK_URL` and `FLASK_SECRET_KEY`
-
--   .
-
+-   Auto‑assign remaining shifts by hitting `/api/schedule`, which calls the Flask service while applying rate limiting and reading environment variables `FLASK_URL` and `FLASK_SECRET_KEY`  
 -   Print-friendly rota view.
 
 Getting Started
@@ -35,9 +32,7 @@ Create a `.env.local` file and define:
 Project Structure
 -----------------
 
--   **src/app** -- Next.js routes and layout (see `src/app/page.tsx` for an overview of the application goals
-
--   ).
+-   **src/app** -- Next.js routes and layout (see `src/app/page.tsx` for an overview of the application goals).
 
 -   **src/ui** -- React components for employees, rota editor and helpers.
 
