@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Shift Wizards
+===============
 
-## Getting Started
+The repository contains a **Next.js 15** front‑end for managing shop rotas. It lets you maintain a list of employees, build weekly shift schedules and automatically resolve unassigned shifts by calling a Flask backend.
 
-First, run the development server:
+Features
+--------
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+-   Create and edit employees with contract hours, roles (Team Leader, CTM, Baker) and unavailable periods.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+-   Design weekly rotas with drag‑and‑drop shifts, respecting shop opening hours.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+-   Auto‑assign remaining shifts by hitting `/api/schedule`, which calls the Flask service while applying rate limiting and reading environment variables `FLASK_URL` and `FLASK_SECRET_KEY`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+-   .
 
-## Learn More
+-   Print-friendly rota view.
 
-To learn more about Next.js, take a look at the following resources:
+Getting Started
+---------------
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Install dependencies and run the dev server:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+`npm install
+npm run dev # or yarn dev / pnpm dev / bun dev  `
 
-## Deploy on Vercel
+Open `http://localhost:3000` in the browser. You can modify pages under `src/app` and React components under `src/ui`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Environment Variables
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Create a `.env.local` file and define:
+
+`FLASK_URL=<URL of your Flask backend> FLASK_SECRET_KEY=<API key expected by Flask> `
+
+Project Structure
+-----------------
+
+-   **src/app** -- Next.js routes and layout (see `src/app/page.tsx` for an overview of the application goals
+
+-   ).
+
+-   **src/ui** -- React components for employees, rota editor and helpers.
+
+-   **src/lib** -- Context providers and utilities for employees and rota management.
+
+Scripts
+-------
+
+-   `npm run dev` -- run Next.js in development mode.
+
+-   `npm run build` -- create a production build.
+
+-   `npm run start` -- start the production server.
+
+-   `npm run lint` -- lint the source code.
+
+The application uses Tailwind CSS for styling and leverages `next/font` to load local fonts. The sample configuration for Tailwind is in `tailwind.config.ts`
+
+.
