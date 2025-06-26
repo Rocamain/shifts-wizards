@@ -25,6 +25,7 @@ export default function Scheduler() {
 
   const fetchRota = useCallback(
     async (weekData: Week, staff: Employee[]) => {
+      console.log("Fetching rota with rest priority:", restPriority, weekData);
       const weeklyRota: Shift[][] = Array.from({ length: 7 }, (_, day) => {
         const dayMap = weekData.get(day as Weekday) ?? new Map<string, Shift>();
         return Array.from(dayMap.values())
@@ -45,45 +46,50 @@ export default function Scheduler() {
 
       // nothing to do
       if (weeklyRota.every((arr) => arr.length === 0)) return;
-      const resp = await fetch("/api/schedule", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          shifts: weeklyRota,
-          employees: staffWithDeductedContractHours,
-          restPriority,
-        }),
-      });
+      try {
+        const resp = await fetch("/api/schedule", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            shifts: weeklyRota,
+            employees: staffWithDeductedContractHours,
+            restPriority,
+          }),
+        });
 
-      const json = await resp.json();
-      if (!resp.ok) {
-        console.error("Schedule API error:", json);
+        const json = await resp.json();
+        if (!resp.ok) {
+          console.error("Schedule API error:", json);
+          return;
+        }
+
+        // Build new Week
+        const returned: Shift[][] = json.shifts;
+        const newWeek: Week = new Map();
+        returned.forEach((dayArr, day) => {
+          const array = [...dayArr, ...shiftsAssigned[day]].map((shift) => {
+            shift.candidates = employees
+              .filter((emp) => isEmployeeAvailableForShift(emp, shift))
+              .map((emp) => emp.id);
+            return shift;
+          });
+          const m = new Map<string, Shift>();
+          array.forEach((sh) => m.set(sh.id, sh));
+          newWeek.set(day as Weekday, m);
+        });
+        resetHoursToEmployees();
+        addApiShifs(newWeek);
+
+        // update employee-assigned shifts
+        returned.forEach((dayArr) =>
+          dayArr.forEach((shift) => {
+            if (shift.employee) addShiftToEmployee(shift.employee, shift);
+          })
+        );
+      } catch (error) {
+        console.error("Error in Scheduler fetchRota:", error);
         return;
       }
-
-      // Build new Week
-      const returned: Shift[][] = json.shifts;
-      const newWeek: Week = new Map();
-      returned.forEach((dayArr, day) => {
-        const array = [...dayArr, ...shiftsAssigned[day]].map((shift) => {
-          shift.candidates = employees
-            .filter((emp) => isEmployeeAvailableForShift(emp, shift))
-            .map((emp) => emp.id);
-          return shift;
-        });
-        const m = new Map<string, Shift>();
-        array.forEach((sh) => m.set(sh.id, sh));
-        newWeek.set(day as Weekday, m);
-      });
-      resetHoursToEmployees();
-      addApiShifs(newWeek);
-
-      // update employee-assigned shifts
-      returned.forEach((dayArr) =>
-        dayArr.forEach((shift) => {
-          if (shift.employee) addShiftToEmployee(shift.employee, shift);
-        })
-      );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [addApiShifs, addShiftToEmployee, restPriority, employees]
