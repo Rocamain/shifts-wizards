@@ -18,8 +18,7 @@ function hasAnyShifts(week: Week): boolean {
 
 export default function Scheduler() {
   const { week: initialWeek, addApiShifs } = useRotaContext();
-  const { employees, addShiftToEmployee, resetHoursToEmployees } =
-    useEmployeeContext();
+  const { employees, addShiftToEmployee } = useEmployeeContext();
   const [submitted, setSubmitted] = useState(false);
   const { restPriority, setRestPriority } = useRestPriorityContext();
 
@@ -43,6 +42,7 @@ export default function Scheduler() {
         ...emp,
         contractHours: emp.contractHours - emp.totalWorkedHours,
       }));
+      console.log("assigned shifts:", shiftsAssigned);
 
       // nothing to do
       if (weeklyRota.every((arr) => arr.length === 0)) return;
@@ -66,18 +66,20 @@ export default function Scheduler() {
         // Build new Week
         const returned: Shift[][] = json.shifts;
         const newWeek: Week = new Map();
+
         returned.forEach((dayArr, day) => {
-          const array = [...dayArr, ...shiftsAssigned[day]].map((shift) => {
-            shift.candidates = employees
-              .filter((emp) => isEmployeeAvailableForShift(emp, shift))
-              .map((emp) => emp.id);
-            return shift;
-          });
+          const array = [...dayArr]
+            .concat(...shiftsAssigned[day])
+            .map((shift) => {
+              shift.candidates = employees
+                .filter((emp) => isEmployeeAvailableForShift(emp, shift))
+                .map((emp) => emp.id);
+              return shift;
+            });
           const m = new Map<string, Shift>();
           array.forEach((sh) => m.set(sh.id, sh));
           newWeek.set(day as Weekday, m);
         });
-        resetHoursToEmployees();
         addApiShifs(newWeek);
 
         // update employee-assigned shifts
@@ -91,7 +93,6 @@ export default function Scheduler() {
         return;
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [addApiShifs, addShiftToEmployee, restPriority, employees]
   );
 
@@ -105,6 +106,7 @@ export default function Scheduler() {
       .catch(console.error)
       .finally(() => setSubmitted(false));
   }, [submitted, fetchRota, initialWeek, employees]);
+
   return (
     <div className="w-[190px] mx-auto h-[200px] border-2 border-gray-300 p-4 rounded-lg shadow-md p-4">
       <h3 className="text-lg font-semibold text-gray-700 mb-3">
