@@ -24,7 +24,6 @@ export default function Scheduler() {
 
   const fetchRota = useCallback(
     async (weekData: Week, staff: Employee[]) => {
-      console.log("Fetching rota with rest priority:", restPriority, weekData);
       const weeklyRota: Shift[][] = Array.from({ length: 7 }, (_, day) => {
         const dayMap = weekData.get(day as Weekday) ?? new Map<string, Shift>();
         return Array.from(dayMap.values())
@@ -42,7 +41,6 @@ export default function Scheduler() {
         ...emp,
         contractHours: emp.contractHours - emp.totalWorkedHours,
       }));
-      console.log("assigned shifts:", shiftsAssigned);
 
       // nothing to do
       if (weeklyRota.every((arr) => arr.length === 0)) return;
