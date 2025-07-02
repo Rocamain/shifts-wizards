@@ -44,7 +44,7 @@ interface RotaContextType {
   updateShift: (day: Weekday, shift: Shift) => void;
   deleteShift: (day: Weekday, shiftId: string) => void;
   replaceDay: (day: Weekday, shifts: DayShiftsMap) => void;
-  loadTemplate: () => void;
+  loadTemplate: (overrideWeek?: Week) => void;
   saveToTemplate: () => void;
 }
 
@@ -148,17 +148,41 @@ export const RotaProvider: React.FC<{ children: React.ReactNode }> = ({
     []
   );
 
-  const loadTemplate = useCallback(() => {
-    const raw = localStorage.getItem("template-shifts");
-    if (!raw) return;
+  const loadTemplate = useCallback(
+    (overrideWeek?: Week) => {
+      let weekToLoad: Week;
 
-    const weekObj = deserializeWeek(raw);
+      if (overrideWeek) {
+        // Use the provided week directly
+        weekToLoad = overrideWeek;
+      } else {
+        // Otherwise fall back to stored template
+        const raw = localStorage.getItem("template-shifts");
+        console.log("Loading template from localStorage:", raw);
+        if (!raw) {
+          setAlertMessage("No saved template found");
+          return;
+        }
+        try {
+          weekToLoad = deserializeWeek(raw);
+          console.log(
+            "Loaded template from localStorage:",
+            JSON.stringify(weekToLoad)
+          );
+        } catch (err) {
+          console.error("Failed to parse stored template:", err);
+          setAlertMessage("Corrupted template data");
+          return;
+        }
+      }
 
-    const blankedWeek = clearShiftAssignments(weekObj);
-    resetHoursToEmployees();
-    dispatch({ type: "LOAD_WEEK", week: blankedWeek });
-    setAlertMessage("Template loaded successfully");
-  }, [resetHoursToEmployees]);
+      const clearedWeek = clearShiftAssignments(weekToLoad);
+      resetHoursToEmployees();
+      dispatch({ type: "LOAD_WEEK", week: clearedWeek });
+      setAlertMessage("Template loaded successfully");
+    },
+    [resetHoursToEmployees, dispatch, setAlertMessage]
+  );
 
   const saveToTemplate = useCallback(() => {
     if (state.status === "modified") {
