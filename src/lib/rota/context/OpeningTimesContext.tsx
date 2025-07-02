@@ -3,7 +3,6 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
 import { generateHoursArray } from "@/lib/rota/utils";
 import { Weekday } from "@/lib/rota/rota";
-import { useRotaContext } from "./RotaContexts";
 
 interface OpeningTimesContextType {
   openingTimes: string[][];
@@ -25,7 +24,6 @@ export const OpeningTimesProvider: React.FC<{
   intialWorkLoad: string[][];
 }> = ({ children, intialWorkLoad }) => {
   const [openingTimes, setOpeningTimesState] = useState(intialWorkLoad);
-  const {} = useRotaContext();
 
   const setOpeningTimes = useCallback(
     ({ day, times }: { day: Weekday; times: [string, string] }) => {

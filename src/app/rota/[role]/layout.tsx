@@ -3,6 +3,8 @@ import EmployeeList from "@/ui/Employees/EmployeeList";
 import RouteSelector from "@/ui/Rota/RouteSelector";
 import ShopHours from "@/ui/Rota/ShopHours";
 import { notFound } from "next/navigation";
+import Box from "@/ui/Other/Box";
+import SampleButton from "@/ui/Rota/SampleButton";
 
 type Params = Promise<{
   role: "CTM" | "TL" | "BAKER";
@@ -58,7 +60,14 @@ export default async function LayoutRole({
           <div>
             <h2 className="text-3xl font-bold mb-4">{roleTitle}</h2>
           </div>
-          <RouteSelector />
+          <div className="flex justify-between gap-16 items-end ">
+            <Box title="Load Sample">
+              <div className="w-[230px] h-[40px] flex items-center justify-center">
+                <SampleButton />
+              </div>
+            </Box>
+            <RouteSelector />
+          </div>
         </div>
         <div className="py-8 flex items-center gap-10 flex-wrap mb-8">
           <div>
